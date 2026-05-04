@@ -1,0 +1,14 @@
+# Pinned to the same lower bounds as douyin-downloader's pyproject.toml.
+# These are the minimum subset needed to import core/api_client.py and its
+# transitive deps. We intentionally exclude rich, aiosqlite, python-dateutil,
+# fastapi, uvicorn, openai-whisper — those belong to upstream's CLI / DB /
+# server / transcripts surfaces, all of which we own in TypeScript now.
+aiohttp>=3.9.0
+aiofiles>=23.2.1
+gmssl>=3.2.2
+pyyaml>=6.0.1
+
+# Optional — uncomment to enable the browser-fallback method
+# (collect_user_post_ids_via_browser). Requires `python -m playwright install
+# chromium` after install.
+# playwright>=1.40.0
