@@ -89,13 +89,7 @@ export function SettingsDialog() {
               active={active}
               editing={editing}
               onCommit={(next) => {
-                setDraft((prev) => {
-                  const merged: ValueMap = { ...prev, [field.id]: next };
-                  if (field.id === "incremental" && next === true) {
-                    merged.useDatabase = true;
-                  }
-                  return merged;
-                });
+                setDraft((prev) => ({ ...prev, [field.id]: next }));
                 setEditingId(null);
               }}
             />
@@ -113,8 +107,5 @@ export function SettingsDialog() {
 }
 
 function mergeBoolean(prev: ValueMap, id: string): ValueMap {
-  const next = !(prev[id] === true);
-  const merged: ValueMap = { ...prev, [id]: next };
-  if (id === "incremental" && next === true) merged.useDatabase = true;
-  return merged;
+  return { ...prev, [id]: !(prev[id] === true) };
 }

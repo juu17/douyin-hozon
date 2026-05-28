@@ -1,0 +1,147 @@
+[
+  {
+    "label": "get_short",
+    "params": "device_platform=webapp&aid=6383&aweme_id=7111",
+    "body": "",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+    "fp": "1920|1080|1952|1170|0|30|0|0|1536|864|1536|864|1920|1080|24|24|Win32",
+    "options": [
+      0,
+      1,
+      8
+    ],
+    "now_ms": 1700000000000,
+    "random_bytes": [
+      1,
+      2,
+      5,
+      40,
+      1,
+      2,
+      5,
+      40,
+      1,
+      2,
+      5,
+      40
+    ],
+    "a_bogus": "DfmhQDgdkVEkDE6Y56KLfY3q6Ir3YDOI0SVkMD2f6V3GqL39HMYD9exEIBGvXY8jwG/-IeSjy4hbO3xprQAjM36UHWwqUxQ2m6fkKl5Q5I0j53iruyR0rtRF4ki-FeeM5iQ3xOssy75nFmT0AoKa-kIlO6ZCcHgOEisnOe8=",
+    "signed_params": "device_platform=webapp&aid=6383&aweme_id=7111&a_bogus=DfmhQDgdkVEkDE6Y56KLfY3q6Ir3YDOI0SVkMD2f6V3GqL39HMYD9exEIBGvXY8jwG/-IeSjy4hbO3xprQAjM36UHWwqUxQ2m6fkKl5Q5I0j53iruyR0rtRF4ki-FeeM5iQ3xOssy75nFmT0AoKa-kIlO6ZCcHgOEisnOe8="
+  },
+  {
+    "label": "get_long",
+    "params": "device_platform=webapp&aid=6383&channel=channel_pc_web&aweme_id=7380308675841297704&pc_client_type=1&version_code=290100&cookie_enabled=true&screen_width=1920&screen_height=1080&browser_name=Edge",
+    "body": "",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+    "fp": "1920|1080|1952|1170|0|30|0|0|1536|864|1536|864|1920|1080|24|24|Win32",
+    "options": [
+      0,
+      1,
+      8
+    ],
+    "now_ms": 1700000000000,
+    "random_bytes": [
+      1,
+      2,
+      5,
+      40,
+      1,
+      2,
+      5,
+      40,
+      1,
+      2,
+      5,
+      40
+    ],
+    "a_bogus": "DfmhQDgdkVEkDE6Y56KLfY3q6Vp3YDOI0SVkMD2fdn3GqL39HMYD9exEIBGvXY8jwG/-IeSjy4hbO3xprQAjM36UHWwqUxQ2m6fkKl5Q5I0j53iruyR0rtRF4ki-FeeM5iQ3xOssy75nFmT0AoKa-kIlO6ZCcHgOEisnOC6=",
+    "signed_params": "device_platform=webapp&aid=6383&channel=channel_pc_web&aweme_id=7380308675841297704&pc_client_type=1&version_code=290100&cookie_enabled=true&screen_width=1920&screen_height=1080&browser_name=Edge&a_bogus=DfmhQDgdkVEkDE6Y56KLfY3q6Vp3YDOI0SVkMD2fdn3GqL39HMYD9exEIBGvXY8jwG/-IeSjy4hbO3xprQAjM36UHWwqUxQ2m6fkKl5Q5I0j53iruyR0rtRF4ki-FeeM5iQ3xOssy75nFmT0AoKa-kIlO6ZCcHgOEisnOC6="
+  },
+  {
+    "label": "post_with_body",
+    "params": "device_platform=webapp&aid=6383",
+    "body": "aweme_type=0&item_id=7467485482314763572&play_delta=1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+    "fp": "1920|1080|1952|1170|0|30|0|0|1536|864|1536|864|1920|1080|24|24|Win32",
+    "options": [
+      0,
+      1,
+      14
+    ],
+    "now_ms": 1700000000000,
+    "random_bytes": [
+      1,
+      2,
+      5,
+      40,
+      1,
+      2,
+      5,
+      40,
+      1,
+      2,
+      5,
+      40
+    ],
+    "a_bogus": "DfmhQDgdkVEkDE6Y56KLfY3q64XHYDOI0SVkMD2fjhPGqL39HMYD9exoIBGvXY8jwG/-IeSjy4hbO3xprQAjM36UHWwqUxQ2m6fkKl5Q5I0j53iruyR0rtRF4ki-FeeM5iQ3xOssy75nFmT0AoKa-kIlO6ZCcHgOEisnOyW=",
+    "signed_params": "device_platform=webapp&aid=6383&a_bogus=DfmhQDgdkVEkDE6Y56KLfY3q64XHYDOI0SVkMD2fjhPGqL39HMYD9exoIBGvXY8jwG/-IeSjy4hbO3xprQAjM36UHWwqUxQ2m6fkKl5Q5I0j53iruyR0rtRF4ki-FeeM5iQ3xOssy75nFmT0AoKa-kIlO6ZCcHgOEisnOyW="
+  },
+  {
+    "label": "post_options14_empty_body",
+    "params": "device_platform=webapp&aid=6383&channel=channel_pc_web&aweme_id=7380308675841297704&pc_client_type=1&version_code=290100&cookie_enabled=true&screen_width=1920&screen_height=1080&browser_name=Edge",
+    "body": "",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+    "fp": "1920|1080|1952|1170|0|30|0|0|1536|864|1536|864|1920|1080|24|24|Win32",
+    "options": [
+      0,
+      1,
+      14
+    ],
+    "now_ms": 1234567890000,
+    "random_bytes": [
+      1,
+      2,
+      5,
+      40,
+      1,
+      2,
+      5,
+      40,
+      1,
+      2,
+      5,
+      40
+    ],
+    "a_bogus": "DfmhQDgdkVEkDE6Y5lILfY3q6Vp3YDOm0SVkMD2fdn3GSL39HMTf9exoGOkv/z8jDG8MIeSjy4hbO3xprQAjM36UHWwqUxQ2m6fkKl5Q5I0j53iruyR0rtRF4ki-FeeM5iQ3xOssy75nFmT0AoKa-kIlO6ZCcHgOEisnOC8=",
+    "signed_params": "device_platform=webapp&aid=6383&channel=channel_pc_web&aweme_id=7380308675841297704&pc_client_type=1&version_code=290100&cookie_enabled=true&screen_width=1920&screen_height=1080&browser_name=Edge&a_bogus=DfmhQDgdkVEkDE6Y5lILfY3q6Vp3YDOm0SVkMD2fdn3GSL39HMTf9exoGOkv/z8jDG8MIeSjy4hbO3xprQAjM36UHWwqUxQ2m6fkKl5Q5I0j53iruyR0rtRF4ki-FeeM5iQ3xOssy75nFmT0AoKa-kIlO6ZCcHgOEisnOC8="
+  },
+  {
+    "label": "late_timer",
+    "params": "device_platform=webapp&aid=6383&mix_id=7333",
+    "body": "",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+    "fp": "1920|1080|1952|1170|0|30|0|0|1536|864|1536|864|1920|1080|24|24|Win32",
+    "options": [
+      0,
+      1,
+      8
+    ],
+    "now_ms": 2000000000000,
+    "random_bytes": [
+      1,
+      2,
+      5,
+      40,
+      1,
+      2,
+      5,
+      40,
+      1,
+      2,
+      5,
+      40
+    ],
+    "a_bogus": "DfmhQDgdkVEkDE6Y5V9LfY3q6Xe3YDYG0SVkMD2f/V3G7L39HMYD9exEMihvZY8jr4MkIeSjy4hbO3xprQAjM36UHWwqUxQ2m6fkKl5Q5I0j53iruyR0rtRF4ki-FeeM5iQ3xOssy75nFmT0AoKa-kIlO6ZCcHgOEisnOcE=",
+    "signed_params": "device_platform=webapp&aid=6383&mix_id=7333&a_bogus=DfmhQDgdkVEkDE6Y5V9LfY3q6Xe3YDYG0SVkMD2f/V3G7L39HMYD9exEMihvZY8jr4MkIeSjy4hbO3xprQAjM36UHWwqUxQ2m6fkKl5Q5I0j53iruyR0rtRF4ki-FeeM5iQ3xOssy75nFmT0AoKa-kIlO6ZCcHgOEisnOcE="
+  }
+]

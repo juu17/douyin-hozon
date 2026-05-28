@@ -69,15 +69,6 @@ const commonSettingsFields: FieldDefinition[] = [
     placement: "settings",
     placeholder: "http://127.0.0.1:7890",
   },
-  { id: "useDatabase", label: "Use Database", kind: "boolean", placement: "settings" },
-  {
-    id: "databasePath",
-    label: "Database Path",
-    kind: "text",
-    placement: "settings",
-    placeholder: "download-db/dy_downloader.db",
-    visible: (values) => values.useDatabase === true,
-  },
   { id: "msToken", label: "msToken", kind: "text", placement: "settings" },
   { id: "ttwid", label: "ttwid", kind: "text", placement: "settings" },
   { id: "odin_tt", label: "odin_tt", kind: "text", placement: "settings" },
@@ -115,14 +106,6 @@ export const MODE_DEFINITIONS: ModeDefinition[] = [
       },
       { id: "savePath", label: "Save Path", kind: "text", placement: "task", placeholder: SAVE_PATH_DEFAULT },
       ...mediaTaskFields,
-      { id: "transcriptEnabled", label: "Generate Transcript", kind: "boolean", placement: "task" },
-      {
-        id: "transcriptApiKey",
-        label: "Transcript API Key",
-        kind: "text",
-        placement: "task",
-        visible: (values) => values.transcriptEnabled === true,
-      },
       ...commonSettingsFields,
     ],
   },
@@ -189,7 +172,7 @@ export const MODE_DEFINITIONS: ModeDefinition[] = [
   {
     id: "creator-liked-posts",
     title: "Creator Liked Posts",
-    description: "Batch download a creator's liked posts with limits and incremental mode.",
+    description: "Batch download a creator's liked posts with limits and date filters.",
     fields: [
       {
         id: "creatorUrl",
@@ -204,16 +187,7 @@ export const MODE_DEFINITIONS: ModeDefinition[] = [
       { id: "limit", label: "Item Limit", kind: "number", placement: "task", placeholder: "0" },
       { id: "startTime", label: "Start Date", kind: "text", placement: "task", placeholder: "YYYY-MM-DD" },
       { id: "endTime", label: "End Date", kind: "text", placement: "task", placeholder: "YYYY-MM-DD" },
-      { id: "incremental", label: "Incremental Download", kind: "boolean", placement: "task" },
       ...mediaTaskFields,
-      { id: "transcriptEnabled", label: "Generate Transcript", kind: "boolean", placement: "task" },
-      {
-        id: "transcriptApiKey",
-        label: "Transcript API Key",
-        kind: "text",
-        placement: "task",
-        visible: (values) => values.transcriptEnabled === true,
-      },
       ...commonSettingsFields,
     ],
   },
@@ -269,19 +243,14 @@ export const DEFAULT_VALUES: ValueMap = {
   limit: "0",
   startTime: "",
   endTime: "",
-  incremental: false,
   includeCover: true,
   includeMusic: true,
   includeAvatar: true,
   includeJson: true,
-  transcriptEnabled: false,
-  transcriptApiKey: "",
   thread: "5",
   retryTimes: "3",
   quietLogs: true,
   proxy: "",
-  useDatabase: true,
-  databasePath: "download-db/dy_downloader.db",
   msToken: "",
   ttwid: "",
   odin_tt: "",
@@ -292,3 +261,39 @@ export const DEFAULT_VALUES: ValueMap = {
 export function createInitialValues(): ValueMap {
   return { ...DEFAULT_VALUES };
 }
+
+// Each mode REMEMBERS these fields independently — its URL field plus its
+// batch/filter fields. Changing `limit` in Collection doesn't affect Creator
+// Liked Posts; switching back restores Collection's own remembered value.
+export const PER_MODE_FIELD_IDS = new Set<string>([
+  "videoUrl", "noteUrl", "collectionUrl", "musicUrl", "creatorUrl",
+  "favoriteSource", "limit", "startTime", "endTime",
+]);
+
+export function isPerModeField(id: string): boolean {
+  return PER_MODE_FIELD_IDS.has(id);
+}
+
+// Initial per-mode field values keyed by mode. Each mode's bucket starts at the
+// defaults relevant to that mode; absent keys fall through to DEFAULT_VALUES.
+export const PER_MODE_DEFAULTS: Record<ModeId, Partial<ValueMap>> = {
+  "single-video": { videoUrl: "" },
+  "image-note": { noteUrl: "" },
+  "collection": { collectionUrl: "", limit: "0", startTime: "", endTime: "" },
+  "music-track": { musicUrl: "" },
+  "creator-liked-posts": { creatorUrl: "", limit: "0", startTime: "", endTime: "" },
+  "my-favorite-collection": {
+    favoriteSource: "https://www.douyin.com/user/self?showTab=favorite_collection",
+    limit: "0",
+  },
+};
+
+// Everything not in PER_MODE_FIELD_IDS is shared across all modes (savePath,
+// the include* toggles, thread, retryTimes, quietLogs, proxy, msToken/...).
+export const SHARED_DEFAULTS: Partial<ValueMap> = (() => {
+  const out: Partial<ValueMap> = {};
+  for (const [k, v] of Object.entries(DEFAULT_VALUES)) {
+    if (!PER_MODE_FIELD_IDS.has(k)) (out as Record<string, unknown>)[k] = v;
+  }
+  return out;
+})();

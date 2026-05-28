@@ -12,7 +12,14 @@
     "dev": "bash ./prerequisite.sh && tsx src/index.tsx",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "monkey": "vitest run tests/monkey",
+    "vendor:acquire": "tsx tools/vendor-interpreter/acquire.ts",
+    "vendor:extract": "tsx tools/vendor-interpreter/extract.ts",
+    "vendor:baseline": "tsx tools/vendor-interpreter/baseline.ts",
+    "vendor:check": "tsx tools/vendor-interpreter/check.ts"
   },
   "keywords": [],
   "author": "",
@@ -21,14 +28,21 @@
     "@types/better-sqlite3": "^7.6.13",
     "better-sqlite3": "^12.9.0",
     "ink": "^5.2.1",
-    "ink-spinner": "^5.0.0",
     "react": "^18.3.1",
+    "undici": "^8.3.0",
     "yaml": "^2.8.2"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
     "@types/react": "^18.3.12",
+    "ink-testing-library": "^4.0.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.7"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
   }
 }

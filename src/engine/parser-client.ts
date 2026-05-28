@@ -1,3 +1,8 @@
+// BREAK-GLASS transport — NOT the default path. Spawns + speaks JSON-lines to
+// parser_sidecar.py, used only under DOUYIN_HOZON_PARSER=sidecar. The default
+// runtime is pure TypeScript (src/engine/native/*); see dispatch.ts. Keep —
+// the native signers are faithful ports, but this is the fallback for a douyin
+// signing bump that outpaces them.
 import { spawn, type ChildProcessByStdio } from "node:child_process";
 import { createInterface, type Interface as ReadlineInterface } from "node:readline";
 import { EventEmitter } from "node:events";

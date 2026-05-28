@@ -1,0 +1,58 @@
+# douyin-hozon settings — template, copied to ./config.yml on first run.
+# Thereafter the TUI auto-saves all your inputs across the 6 modes into
+# config.yml as you edit. config.yml is gitignored; this file is committed.
+
+# Current mode (one of the 6 keys under `modes:` below).
+modeId: single-video
+
+# Douyin cookies, populated by the "Capture Cookies" command (press /).
+# Leave as {} on first run.
+cookieJar: {}
+
+# Settings that apply across every mode. Change `savePath` here and every mode
+# uses it; toggle `includeMusic` here and it affects all media-mode downloads.
+shared:
+  # Empty `savePath` = ~/Downloads/douyin-hozon
+  savePath: ""
+  includeCover: true
+  includeMusic: true
+  includeAvatar: true
+  includeJson: true
+  thread: "5"
+  retryTimes: "3"
+  quietLogs: true
+  proxy: ""
+  # Manual cookie overrides — usually unused; "Capture Cookies" fills cookieJar above.
+  msToken: ""
+  ttwid: ""
+  odin_tt: ""
+  passportCsrfToken: ""
+  sidGuard: ""
+
+# Per-mode inputs — each mode REMEMBERS its own URL field plus its
+# limit/date filters independently.
+modes:
+  single-video:
+    videoUrl: ""
+
+  image-note:
+    noteUrl: ""
+
+  collection:
+    collectionUrl: ""
+    limit: "0"
+    startTime: ""
+    endTime: ""
+
+  music-track:
+    musicUrl: ""
+
+  creator-liked-posts:
+    creatorUrl: ""
+    limit: "0"
+    startTime: ""
+    endTime: ""
+
+  my-favorite-collection:
+    favoriteSource: "https://www.douyin.com/user/self?showTab=favorite_collection"
+    limit: "0"

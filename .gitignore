@@ -2,11 +2,8 @@ node_modules
 dist
 .DS_Store
 .venv
+.venv-dev
+.vendor-cache/
 config.yml
-download-db/
-Downloaded/
-douyin-downloader/
-douyin-downloader.backup-pre-upstream-reset/
-skills/
-checkpoints/
 TUI_UX*
+*.bak

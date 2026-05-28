@@ -1,6 +1,6 @@
 # Backlog
 
-Follow-up items left open after the Ink migration. Not blockers — the TUI ships and runs without them. Listed in rough priority order.
+Follow-up items left open. Not blockers — the TUI ships and runs without them. Listed in rough priority order.
 
 ## 1. Mouse support
 
@@ -56,6 +56,3 @@ surface is minimal. ~half a day of UI work when wanted.
 
 **Effort**: ~2 hours.
 
----
-
-Items not listed here are intentionally out of scope (e.g., automatic cookie capture from a browser session — that's a separate product question, not a follow-up to the migration).

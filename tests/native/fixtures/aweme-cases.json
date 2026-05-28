@@ -1,0 +1,100 @@
+[
+  {
+    "name": "video_cdn_fallback",
+    "aweme_data": {
+      "aweme_id": "7111",
+      "desc": "  CDN clip  ",
+      "create_time": 1700000000,
+      "author": { "uid": "u1", "nickname": "Alice", "avatar_larger": { "url_list": ["https://av/a.jpg"] } },
+      "video": {
+        "play_addr": { "url_list": ["https://v.cdn.example.com/x.mp4?watermark=1"] },
+        "cover": { "url_list": ["https://c/cov.jpg"] }
+      },
+      "music": { "play_url": { "url_list": ["https://m/track.mp3"] } }
+    }
+  },
+  {
+    "name": "video_douyin_needs_sign",
+    "aweme_data": {
+      "aweme_id": "7222",
+      "desc": "needs sign",
+      "create_time": 1700000000,
+      "video": { "play_addr": { "url_list": ["https://www.douyin.com/aweme/v1/play/?id=1"] } }
+    }
+  },
+  {
+    "name": "video_douyin_presigned",
+    "aweme_data": {
+      "aweme_id": "7333",
+      "desc": "presigned",
+      "create_time": 1700000000,
+      "video": { "play_addr": { "url_list": ["https://www.douyin.com/play/?X-Bogus=ABC"] } }
+    }
+  },
+  {
+    "name": "video_uri_fallback",
+    "aweme_data": {
+      "aweme_id": "7444",
+      "desc": "uri only",
+      "create_time": 1700000000,
+      "video": { "play_addr": { "uri": "v0300abc" } }
+    }
+  },
+  {
+    "name": "video_bitrate_ladder",
+    "aweme_data": {
+      "aweme_id": "7555",
+      "desc": "ladder",
+      "create_time": 1700000000,
+      "video": {
+        "bit_rate": [
+          { "bit_rate": 1000, "play_addr": { "url_list": ["https://cdn/lo.mp4"], "width": 720 } },
+          { "bit_rate": 2000, "play_addr": { "url_list": ["https://cdn/hi.mp4"], "width": 1080 } }
+        ]
+      }
+    }
+  },
+  {
+    "name": "gallery_image_post_info",
+    "aweme_data": {
+      "aweme_id": "7666",
+      "desc": "gallery",
+      "create_time": 1700000000,
+      "image_post_info": {
+        "images": [{ "url_list": ["https://img/1.jpg"] }, { "url_list": ["https://img/2.jpg"] }]
+      }
+    }
+  },
+  {
+    "name": "gallery_toplevel_images",
+    "aweme_data": {
+      "aweme_id": "7777",
+      "desc": "top",
+      "create_time": 1700000000,
+      "aweme_type": 2,
+      "images": [{ "url_list": ["https://img/t1.jpg"] }]
+    }
+  },
+  {
+    "name": "gallery_image_live_dedup",
+    "aweme_data": {
+      "aweme_id": "7888",
+      "desc": "live",
+      "create_time": 1700000000,
+      "image_post_info": {
+        "images": [
+          { "video": { "play_addr": { "url_list": ["https://live/x.mp4"] } } },
+          { "video": { "play_addr": { "url_list": ["https://live/x.mp4"] } } }
+        ]
+      }
+    }
+  },
+  {
+    "name": "defaults_missing_fields",
+    "aweme_data": { "aweme_id": "7999", "create_time": 1700000000 }
+  },
+  {
+    "name": "gallery_type_only",
+    "aweme_data": { "aweme_id": "7000", "desc": "typ", "create_time": 1700000000, "aweme_type": 68 }
+  }
+]

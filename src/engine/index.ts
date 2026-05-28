@@ -1,5 +1,7 @@
 import path from "node:path";
 import { ParserClient } from "./parser-client.js";
+import { NativeDouyinApiClient } from "./native/api-client.js";
+import { parserMode } from "./native/dispatch.js";
 import { ProgressBus } from "./progress.js";
 import {
   parseDateFilter,
@@ -11,7 +13,6 @@ import {
   type DownloaderOptions,
   type ItemOutcome,
 } from "./downloader.js";
-import { DedupeDb } from "./db.js";
 import { defaultSavePath } from "./file-layout.js";
 import { urlFieldForMode } from "../modes.js";
 import type { ModeId, ValueMap } from "../modes.js";
@@ -63,7 +64,9 @@ const MODE_FOLDER: Record<ModeId, string> = {
 
 export class Engine {
   private client: ParserClient | null = null;
-  private db: DedupeDb | null = null;
+  // Native signed HTTP client, built only in native mode. In sidecar mode this
+  // stays null and `client` (the Python process) does the work.
+  private nativeClient: NativeDouyinApiClient | null = null;
   private bus = new ProgressBus();
   // Each launch gets a fresh AbortController; stop() aborts all in-flight
   // HTTP fetches (via DownloaderOptions.signal → fetcher).
@@ -76,36 +79,30 @@ export class Engine {
   }
 
   async start(values: ValueMap, cookieJar?: Record<string, string> | null): Promise<void> {
-    if (this.client) return;
-    this.client = new ParserClient({
-      pythonBin: this.paths.pythonBin,
-      sidecarScript: this.paths.sidecarScript,
-      cwd: this.paths.projectRoot,
-      env: { DOUYIN_HOZON_DOWNLOADER_PATH: this.paths.downloaderRoot },
-    });
-    this.client.on("stderr", (line) => {
-      // Surface unexpected stderr as low-priority log events.
-      this.bus.emitProgress({ kind: "stage", stage: "fetching", detail: `[sidecar] ${line}` });
-    });
-    await this.client.start();
+    if (this.client || this.nativeClient) return;
     // A captured jar (full ~30-cookie dict from Chrome) wins over the
-    // 5-field manual entry. The sidecar accepts the full dict either way.
+    // 5-field manual entry.
     const cookies = cookieJar && Object.keys(cookieJar).length > 0
       ? cookieJar
       : extractCookies(values);
-    await this.client.init({
-      cookies,
-      proxy: typeof values.proxy === "string" ? values.proxy : "",
-    });
+    const proxy = typeof values.proxy === "string" ? values.proxy : "";
 
-    if (values.useDatabase === true) {
-      const dbPath = (typeof values.databasePath === "string" && values.databasePath.trim())
-        ? values.databasePath
-        : "download-db/dy_downloader.db";
-      const resolved = path.isAbsolute(dbPath)
-        ? dbPath
-        : path.resolve(this.paths.projectRoot, dbPath);
-      this.db = new DedupeDb(resolved);
+    if (parserMode() === "native") {
+      // Default path: pure TypeScript. No Python sidecar is spawned.
+      this.nativeClient = new NativeDouyinApiClient(cookies, proxy);
+    } else {
+      // Break-glass: DOUYIN_HOZON_PARSER=sidecar spawns the Python sidecar.
+      this.client = new ParserClient({
+        pythonBin: this.paths.pythonBin,
+        sidecarScript: this.paths.sidecarScript,
+        cwd: this.paths.projectRoot,
+        env: { DOUYIN_HOZON_DOWNLOADER_PATH: this.paths.downloaderRoot },
+      });
+      this.client.on("stderr", (line) => {
+        this.bus.emitProgress({ kind: "stage", stage: "fetching", detail: `[sidecar] ${line}` });
+      });
+      await this.client.start();
+      await this.client.init({ cookies, proxy });
     }
   }
 
@@ -115,27 +112,20 @@ export class Engine {
     this.abortController = new AbortController();
     const c = this.client;
     this.client = null;
+    this.nativeClient = null;
     if (c) await c.shutdown();
-    this.db?.close();
-    this.db = null;
   }
 
   async runMode(modeId: ModeId, values: ValueMap): Promise<ItemOutcome | ItemOutcome[]> {
-    if (!this.client) throw new Error("Engine not started");
+    if (!this.client && !this.nativeClient) throw new Error("Engine not started");
     const limit = parseLimit(values.limit);
     const dateFilter = parseDateFilter(
       typeof values.startTime === "string" ? values.startTime : "",
       typeof values.endTime === "string" ? values.endTime : "",
     );
-    const transcriptApiKey = typeof values.transcriptApiKey === "string"
-      ? values.transcriptApiKey.trim()
-      : "";
-    const transcriptEnabled =
-      (modeId === "single-video" || modeId === "creator-liked-posts") &&
-      values.transcriptEnabled === true;
-
     const opts: DownloaderOptions = {
       client: this.client,
+      nativeClient: this.nativeClient,
       baseDir: typeof values.savePath === "string" && values.savePath.trim()
         ? values.savePath
         : defaultSavePath(),
@@ -145,13 +135,8 @@ export class Engine {
         music: values.includeMusic === true,
         avatar: values.includeAvatar === true,
         json: values.includeJson === true,
-        transcript: transcriptEnabled,
       },
-      transcript: transcriptEnabled
-        ? { apiKey: transcriptApiKey || process.env.OPENAI_API_KEY || "" }
-        : undefined,
       bus: this.bus,
-      db: this.db ?? undefined,
       itemLimit: limit,
       dateFilter,
       parallelism: parseThread(values.thread),

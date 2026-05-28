@@ -1,0 +1,42 @@
+[
+  {
+    "label": "detail_default_ua",
+    "url": "https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id=7111111111111111111&device_platform=webapp&aid=6383",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "timer": 1700000000,
+    "x_bogus": "DFSzswVYmVXANxu0tmWx-e9WX7jH",
+    "signed_url": "https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id=7111111111111111111&device_platform=webapp&aid=6383&X-Bogus=DFSzswVYmVXANxu0tmWx-e9WX7jH"
+  },
+  {
+    "label": "detail_mac_ua",
+    "url": "https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id=7222&aid=6383",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "timer": 1700000000,
+    "x_bogus": "DFSzswVY-jGANHwBtmWx-e9WX7rk",
+    "signed_url": "https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id=7222&aid=6383&X-Bogus=DFSzswVY-jGANHwBtmWx-e9WX7rk"
+  },
+  {
+    "label": "user_post",
+    "url": "https://www.douyin.com/aweme/v1/web/aweme/post/?sec_user_id=MS4wLjABAAAA&count=18&max_cursor=0",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "timer": 1699999999,
+    "x_bogus": "DFSzswVY33XANHwBtmWyLM9WX7jo",
+    "signed_url": "https://www.douyin.com/aweme/v1/web/aweme/post/?sec_user_id=MS4wLjABAAAA&count=18&max_cursor=0&X-Bogus=DFSzswVY33XANHwBtmWyLM9WX7jo"
+  },
+  {
+    "label": "music_detail",
+    "url": "https://www.douyin.com/aweme/v1/web/music/detail/?music_id=7044444444444444444&device_platform=webapp&aid=6383",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "timer": 1234567890,
+    "x_bogus": "DFSzswVYl2sANxu097B4Fl9WX7jm",
+    "signed_url": "https://www.douyin.com/aweme/v1/web/music/detail/?music_id=7044444444444444444&device_platform=webapp&aid=6383&X-Bogus=DFSzswVYl2sANxu097B4Fl9WX7jm"
+  },
+  {
+    "label": "late_timer",
+    "url": "https://www.douyin.com/aweme/v1/web/mix/aweme/?mix_id=7333&cursor=0&count=20",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "timer": 2000000000,
+    "x_bogus": "DFSzswVYoDiANHwBGKhf-e9WX7ji",
+    "signed_url": "https://www.douyin.com/aweme/v1/web/mix/aweme/?mix_id=7333&cursor=0&count=20&X-Bogus=DFSzswVYoDiANHwBGKhf-e9WX7ji"
+  }
+]

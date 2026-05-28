@@ -51,7 +51,18 @@ export interface InitResult {
   downloader_root: string;
 }
 
-export type ParsedUrlKind = "video" | "user" | "collection" | "gallery" | "music" | "live";
+// "short" is emitted by the parser when the input is still an unresolved
+// short link (v.douyin.com/...). In practice the engine resolves short URLs
+// before parsing, so downstream rarely sees it — but the native port mirrors
+// upstream's parse_url_type exactly, which can return it.
+export type ParsedUrlKind =
+  | "video"
+  | "user"
+  | "collection"
+  | "gallery"
+  | "music"
+  | "live"
+  | "short";
 
 export interface ParsedUrl {
   original_url: string;

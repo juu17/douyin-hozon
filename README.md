@@ -20,30 +20,34 @@ URL fields accept the noisy "share text" douyin gives you (like `5.12 Z@m... Des
 ## Requirements
 
 - **Node.js 18+**
-- **Python 3** (used internally; you don't need to do anything with it)
 - **macOS or Windows** (for the one-click Chrome cookie capture)
 - **Google Chrome** with douyin signed in (any profile — it auto-picks the right one)
+
+No Python, no virtualenv. The app is pure TypeScript/Node — it parses douyin
+URLs, signs the web-API requests (X-Bogus / a_bogus / msToken), and downloads,
+all natively. (A legacy Python sidecar still ships as an optional break-glass —
+see [Break-glass](#break-glass).)
 
 ## Install
 
 ```bash
 git clone <this-repo>
 cd douyin-hozon
-npm install
+pnpm install
 ```
 
 ## Run
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
-That's it. The first run also clones the upstream parser, sets up its Python virtualenv, and installs Python deps automatically. Subsequent runs skip those if nothing changed.
+That's it — pure TypeScript, no extra setup.
 
 ## First-time setup (30 seconds)
 
 1. Make sure you're signed in to `douyin.com` in Chrome (any profile, you don't have to think about which one).
-2. Start the app: `npm run dev`
+2. Start the app: `pnpm dev`
 3. Press `/` to open the command palette.
 4. Pick **Capture Cookies**. Chrome stays open; cookies are pulled automatically.
 
@@ -64,7 +68,7 @@ To download something:
 1. Pick a mode on the left.
 2. Tab into the right panel.
 3. Fill in the URL (paste anything — the app cleans it up).
-4. Tweak any optional fields you want (cover/music/avatar/JSON, item limits for batch modes, transcript).
+4. Tweak any optional fields you want (cover/music/avatar/JSON, item limits for batch modes).
 5. Tab to the **Download** button → `Enter`.
 
 Files land under `~/Downloads/douyin-hozon/<author>/<mode>/<date>_<title>_<id>/`. Change the **Save Path** field to land them anywhere else.
@@ -72,9 +76,9 @@ Files land under `~/Downloads/douyin-hozon/<author>/<mode>/<date>_<title>_<id>/`
 ## Tips
 
 - **Hold Backspace** for ~3 seconds to wipe the field you're editing.
-- **Settings** (`/` → `/settings`) holds shared configuration: concurrent download limit, retry count, proxy, transcript API key, manual cookie overrides.
+- **Settings** (`/` → `/settings`) holds shared configuration: concurrent download limit, retry count, proxy, manual cookie overrides.
 - **Item Limit** for batch modes (Collection / Creator Liked / Favorites): set it to a small number (`2`) the first time so you can verify things work before pulling hundreds.
-- **Incremental Download** (Creator Liked) skips items you've already pulled. The dedup database lives in `download-db/` next to the project.
+- **Settings persist automatically.** All your inputs across the 6 modes (URLs, save path, toggles, captured cookies) are auto-saved to `./config.yml` as you edit. `config.yml` is gitignored; the template lives at `config.example.yml`.
 - If you have multiple douyin accounts in different Chrome profiles, the app automatically picks the profile with the most douyin cookies.
 
 ## Troubleshooting
@@ -88,6 +92,25 @@ Files land under `~/Downloads/douyin-hozon/<author>/<mode>/<date>_<title>_<id>/`
 | Item count is 0 for Creator Liked Posts           | The creator's likes are private — that's douyin's choice, not ours.                |
 | Item count is 0 for My Favorite Collection        | Your account has no saved "favorites" folders. (Not the same as browsing history.) |
 | Downloads go to the wrong folder                  | Edit the **Save Path** field in the TASK panel.                                    |
+
+## Break-glass
+
+douyin occasionally bumps its anti-bot signing. The native signer is a faithful
+port of the upstream algorithms; if a bump ever outpaces it, you can fall back
+to the original Python implementation without waiting for a fix:
+
+```bash
+DOUYIN_HOZON_PARSER=sidecar pnpm dev
+```
+
+This spawns the legacy Python sidecar. The first sidecar run clones the pinned
+upstream `douyin-downloader`, creates a `.venv`, and installs its Python deps —
+so this path (and only this path) needs **Python 3** on your `PATH`.
+
+Maintainers: `pnpm vendor:check` diffs the upstream signing/parsing signatures
+against the committed `vendor-api/tally.json` and flags drift, so a bump is
+caught before it breaks anyone. Full drift → re-port → re-baseline workflow in
+[docs/MAINTAINER.md](docs/MAINTAINER.md).
 
 ## License
 

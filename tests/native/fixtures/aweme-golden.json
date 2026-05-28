@@ -1,0 +1,448 @@
+{
+  "video_cdn_fallback": {
+    "media_type": "video",
+    "aweme_id": "7111",
+    "title": "CDN clip",
+    "publish_ts": 1700000000,
+    "publish_date": "2023-11-14",
+    "file_stem": "2023-11-14_CDN_clip_7111",
+    "author": {
+      "id": "u1",
+      "name": "Alice",
+      "avatar": {
+        "url": "https://av/a.jpg",
+        "headers": {
+          "Referer": "https://www.douyin.com/",
+          "Origin": "https://www.douyin.com",
+          "Accept": "*/*",
+          "User-Agent": "UA-TEST"
+        }
+      }
+    },
+    "video": {
+      "url": "https://v.cdn.example.com/x.mp4?watermark=1",
+      "headers": {
+        "Referer": "https://www.douyin.com/",
+        "Origin": "https://www.douyin.com",
+        "Accept": "*/*",
+        "User-Agent": "UA-TEST"
+      }
+    },
+    "cover": {
+      "url": "https://c/cov.jpg",
+      "headers": {
+        "Referer": "https://www.douyin.com/",
+        "Origin": "https://www.douyin.com",
+        "Accept": "*/*",
+        "User-Agent": "UA-TEST"
+      }
+    },
+    "music": {
+      "url": "https://m/track.mp3",
+      "headers": {
+        "Referer": "https://www.douyin.com/",
+        "Origin": "https://www.douyin.com",
+        "Accept": "*/*",
+        "User-Agent": "UA-TEST"
+      }
+    },
+    "images": [],
+    "image_live": [],
+    "raw": {
+      "aweme_id": "7111",
+      "desc": "  CDN clip  ",
+      "create_time": 1700000000,
+      "author": {
+        "uid": "u1",
+        "nickname": "Alice",
+        "avatar_larger": {
+          "url_list": [
+            "https://av/a.jpg"
+          ]
+        }
+      },
+      "video": {
+        "play_addr": {
+          "url_list": [
+            "https://v.cdn.example.com/x.mp4?watermark=1"
+          ]
+        },
+        "cover": {
+          "url_list": [
+            "https://c/cov.jpg"
+          ]
+        }
+      },
+      "music": {
+        "play_url": {
+          "url_list": [
+            "https://m/track.mp3"
+          ]
+        }
+      }
+    }
+  },
+  "video_douyin_needs_sign": {
+    "media_type": "video",
+    "aweme_id": "7222",
+    "title": "needs sign",
+    "publish_ts": 1700000000,
+    "publish_date": "2023-11-14",
+    "file_stem": "2023-11-14_needs_sign_7222",
+    "author": {
+      "id": null,
+      "name": "unknown_author",
+      "avatar": null
+    },
+    "video": {
+      "url": "https://www.douyin.com/aweme/v1/play/?id=1&X-Bogus=MOCK",
+      "headers": {
+        "Referer": "https://www.douyin.com/",
+        "Origin": "https://www.douyin.com",
+        "Accept": "*/*",
+        "User-Agent": "UA-SIGNED"
+      }
+    },
+    "cover": null,
+    "music": null,
+    "images": [],
+    "image_live": [],
+    "raw": {
+      "aweme_id": "7222",
+      "desc": "needs sign",
+      "create_time": 1700000000,
+      "video": {
+        "play_addr": {
+          "url_list": [
+            "https://www.douyin.com/aweme/v1/play/?id=1"
+          ]
+        }
+      }
+    }
+  },
+  "video_douyin_presigned": {
+    "media_type": "video",
+    "aweme_id": "7333",
+    "title": "presigned",
+    "publish_ts": 1700000000,
+    "publish_date": "2023-11-14",
+    "file_stem": "2023-11-14_presigned_7333",
+    "author": {
+      "id": null,
+      "name": "unknown_author",
+      "avatar": null
+    },
+    "video": {
+      "url": "https://www.douyin.com/play/?X-Bogus=ABC",
+      "headers": {
+        "Referer": "https://www.douyin.com/",
+        "Origin": "https://www.douyin.com",
+        "Accept": "*/*",
+        "User-Agent": "UA-TEST"
+      }
+    },
+    "cover": null,
+    "music": null,
+    "images": [],
+    "image_live": [],
+    "raw": {
+      "aweme_id": "7333",
+      "desc": "presigned",
+      "create_time": 1700000000,
+      "video": {
+        "play_addr": {
+          "url_list": [
+            "https://www.douyin.com/play/?X-Bogus=ABC"
+          ]
+        }
+      }
+    }
+  },
+  "video_uri_fallback": {
+    "media_type": "video",
+    "aweme_id": "7444",
+    "title": "uri only",
+    "publish_ts": 1700000000,
+    "publish_date": "2023-11-14",
+    "file_stem": "2023-11-14_uri_only_7444",
+    "author": {
+      "id": null,
+      "name": "unknown_author",
+      "avatar": null
+    },
+    "video": {
+      "url": "https://www.douyin.com/aweme/v1/play/?video_id=v0300abc&ratio=1080p&line=0&is_play_url=1&watermark=0&source=PackSourceEnum_PUBLISH&X-Bogus=MOCK",
+      "headers": {
+        "Referer": "https://www.douyin.com/",
+        "Origin": "https://www.douyin.com",
+        "Accept": "*/*",
+        "User-Agent": "UA-SIGNED"
+      }
+    },
+    "cover": null,
+    "music": null,
+    "images": [],
+    "image_live": [],
+    "raw": {
+      "aweme_id": "7444",
+      "desc": "uri only",
+      "create_time": 1700000000,
+      "video": {
+        "play_addr": {
+          "uri": "v0300abc"
+        }
+      }
+    }
+  },
+  "video_bitrate_ladder": {
+    "media_type": "video",
+    "aweme_id": "7555",
+    "title": "ladder",
+    "publish_ts": 1700000000,
+    "publish_date": "2023-11-14",
+    "file_stem": "2023-11-14_ladder_7555",
+    "author": {
+      "id": null,
+      "name": "unknown_author",
+      "avatar": null
+    },
+    "video": {
+      "url": "https://cdn/hi.mp4",
+      "headers": {
+        "Referer": "https://www.douyin.com/",
+        "Origin": "https://www.douyin.com",
+        "Accept": "*/*",
+        "User-Agent": "UA-TEST"
+      }
+    },
+    "cover": null,
+    "music": null,
+    "images": [],
+    "image_live": [],
+    "raw": {
+      "aweme_id": "7555",
+      "desc": "ladder",
+      "create_time": 1700000000,
+      "video": {
+        "bit_rate": [
+          {
+            "bit_rate": 1000,
+            "play_addr": {
+              "url_list": [
+                "https://cdn/lo.mp4"
+              ],
+              "width": 720
+            }
+          },
+          {
+            "bit_rate": 2000,
+            "play_addr": {
+              "url_list": [
+                "https://cdn/hi.mp4"
+              ],
+              "width": 1080
+            }
+          }
+        ]
+      }
+    }
+  },
+  "gallery_image_post_info": {
+    "media_type": "gallery",
+    "aweme_id": "7666",
+    "title": "gallery",
+    "publish_ts": 1700000000,
+    "publish_date": "2023-11-14",
+    "file_stem": "2023-11-14_gallery_7666",
+    "author": {
+      "id": null,
+      "name": "unknown_author",
+      "avatar": null
+    },
+    "video": null,
+    "cover": null,
+    "music": null,
+    "images": [
+      {
+        "url": "https://img/1.jpg",
+        "headers": {
+          "Referer": "https://www.douyin.com/",
+          "Origin": "https://www.douyin.com",
+          "Accept": "*/*",
+          "User-Agent": "UA-TEST"
+        }
+      },
+      {
+        "url": "https://img/2.jpg",
+        "headers": {
+          "Referer": "https://www.douyin.com/",
+          "Origin": "https://www.douyin.com",
+          "Accept": "*/*",
+          "User-Agent": "UA-TEST"
+        }
+      }
+    ],
+    "image_live": [],
+    "raw": {
+      "aweme_id": "7666",
+      "desc": "gallery",
+      "create_time": 1700000000,
+      "image_post_info": {
+        "images": [
+          {
+            "url_list": [
+              "https://img/1.jpg"
+            ]
+          },
+          {
+            "url_list": [
+              "https://img/2.jpg"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "gallery_toplevel_images": {
+    "media_type": "gallery",
+    "aweme_id": "7777",
+    "title": "top",
+    "publish_ts": 1700000000,
+    "publish_date": "2023-11-14",
+    "file_stem": "2023-11-14_top_7777",
+    "author": {
+      "id": null,
+      "name": "unknown_author",
+      "avatar": null
+    },
+    "video": null,
+    "cover": null,
+    "music": null,
+    "images": [
+      {
+        "url": "https://img/t1.jpg",
+        "headers": {
+          "Referer": "https://www.douyin.com/",
+          "Origin": "https://www.douyin.com",
+          "Accept": "*/*",
+          "User-Agent": "UA-TEST"
+        }
+      }
+    ],
+    "image_live": [],
+    "raw": {
+      "aweme_id": "7777",
+      "desc": "top",
+      "create_time": 1700000000,
+      "aweme_type": 2,
+      "images": [
+        {
+          "url_list": [
+            "https://img/t1.jpg"
+          ]
+        }
+      ]
+    }
+  },
+  "gallery_image_live_dedup": {
+    "media_type": "gallery",
+    "aweme_id": "7888",
+    "title": "live",
+    "publish_ts": 1700000000,
+    "publish_date": "2023-11-14",
+    "file_stem": "2023-11-14_live_7888",
+    "author": {
+      "id": null,
+      "name": "unknown_author",
+      "avatar": null
+    },
+    "video": null,
+    "cover": null,
+    "music": null,
+    "images": [],
+    "image_live": [
+      {
+        "url": "https://live/x.mp4",
+        "headers": {
+          "Referer": "https://www.douyin.com/",
+          "Origin": "https://www.douyin.com",
+          "Accept": "*/*",
+          "User-Agent": "UA-TEST"
+        }
+      }
+    ],
+    "raw": {
+      "aweme_id": "7888",
+      "desc": "live",
+      "create_time": 1700000000,
+      "image_post_info": {
+        "images": [
+          {
+            "video": {
+              "play_addr": {
+                "url_list": [
+                  "https://live/x.mp4"
+                ]
+              }
+            }
+          },
+          {
+            "video": {
+              "play_addr": {
+                "url_list": [
+                  "https://live/x.mp4"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "defaults_missing_fields": {
+    "media_type": "video",
+    "aweme_id": "7999",
+    "title": "no_title",
+    "publish_ts": 1700000000,
+    "publish_date": "2023-11-14",
+    "file_stem": "2023-11-14_no_title_7999",
+    "author": {
+      "id": null,
+      "name": "unknown_author",
+      "avatar": null
+    },
+    "video": null,
+    "cover": null,
+    "music": null,
+    "images": [],
+    "image_live": [],
+    "raw": {
+      "aweme_id": "7999",
+      "create_time": 1700000000
+    }
+  },
+  "gallery_type_only": {
+    "media_type": "gallery",
+    "aweme_id": "7000",
+    "title": "typ",
+    "publish_ts": 1700000000,
+    "publish_date": "2023-11-14",
+    "file_stem": "2023-11-14_typ_7000",
+    "author": {
+      "id": null,
+      "name": "unknown_author",
+      "avatar": null
+    },
+    "video": null,
+    "cover": null,
+    "music": null,
+    "images": [],
+    "image_live": [],
+    "raw": {
+      "aweme_id": "7000",
+      "desc": "typ",
+      "create_time": 1700000000,
+      "aweme_type": 68
+    }
+  }
+}

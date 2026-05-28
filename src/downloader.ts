@@ -1,23 +1,28 @@
 // Startup helpers shared between the engine and the TUI bootstrap.
 //
-// The legacy YAML-config + `python run.py` spawn path is gone. All runtime
-// download orchestration now lives in src/engine/. What remains here:
-//
 //   - resolvePaths           : project + downloader paths used by the bootstrap
-//   - dependencyExists       : sanity-check that douyin-downloader is present
-//   - mapConfigToValues      : read existing config.yml on first run so users
-//                              with a pre-existing config don't have to re-type
-//                              cookies / save path / mode in the TUI
-//   - bootstrapProjectConfig : the app.tsx mount-time hook that runs the above
+//                              (downloaderRoot is only consumed by the sidecar
+//                              break-glass path; native default ignores it).
+//   - bootstrapProjectConfig : on app mount, ensure a ./config.yml exists
+//                              (copying ./config.example.yml if not), parse it
+//                              with the NATIVE schema (modeId / cookieJar /
+//                              values), and return values to seed the store.
 //
-// Cookies and most fields read from config.yml seed the in-memory store. The
-// TUI no longer writes back to config.yml — values are kept in-process and
-// survive the session via the engine.
+// The TUI auto-persists state.modeId / state.values / state.cookieJar back
+// into ./config.yml on every change (debounced) — see src/state/config-persist.ts.
 
 import fs from "node:fs/promises";
 import path from "node:path";
 import YAML from "yaml";
-import { urlFieldForMode, type ModeId, type ValueMap } from "./modes.js";
+import {
+  isPerModeField,
+  MODE_DEFINITIONS,
+  MODE_INDEX,
+  PER_MODE_FIELD_IDS,
+  SHARED_DEFAULTS,
+  type ModeId,
+  type ValueMap,
+} from "./modes.js";
 
 export interface DownloaderPaths {
   projectRoot: string;
@@ -28,7 +33,9 @@ export interface StartupConfigState {
   configPath: string;
   createdFromExample: boolean;
   modeId?: ModeId;
-  values: Partial<ValueMap>;
+  shared: Partial<ValueMap>;
+  byMode: Partial<Record<ModeId, Partial<ValueMap>>>;
+  cookieJar: Record<string, string>;
   status: string;
 }
 
@@ -39,178 +46,108 @@ export function resolvePaths(projectRoot: string): DownloaderPaths {
   return { projectRoot, downloaderRoot };
 }
 
-export async function dependencyExists(downloaderRoot: string): Promise<boolean> {
-  try {
-    await fs.access(path.join(downloaderRoot, "core", "api_client.py"));
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function readStringValue(value: unknown): string | undefined {
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return String(value);
-  return undefined;
-}
-
-function readBooleanValue(value: unknown): boolean | undefined {
-  if (typeof value === "boolean") return value;
-  return undefined;
-}
-
-function readFirstLink(value: unknown): string | undefined {
-  if (typeof value === "string") return value.trim() || undefined;
-  if (Array.isArray(value)) {
-    for (const entry of value) {
-      if (typeof entry === "string" && entry.trim()) return entry.trim();
+// Pick the keys that are valid for a given bucket (shared vs per-mode), drop
+// anything else (stale fields from a prior version, junk, wrong-typed values).
+function pickValid(raw: unknown, validKeys: Set<string>): Partial<ValueMap> {
+  if (!isRecord(raw)) return {};
+  const out: Partial<ValueMap> = {};
+  for (const [k, v] of Object.entries(raw)) {
+    if (!validKeys.has(k)) continue;
+    if (typeof v === "string" || typeof v === "boolean" || typeof v === "number") {
+      (out as Record<string, string | boolean | number>)[k] = v;
     }
   }
-  return undefined;
+  return out;
 }
 
-function readModeEntry(value: unknown): string | undefined {
-  if (typeof value === "string") return value.trim() || undefined;
-  if (Array.isArray(value)) {
-    for (const entry of value) {
-      if (typeof entry === "string" && entry.trim()) return entry.trim();
+// Parse the native config.yml schema: { modeId, cookieJar, shared, modes: <per-mode buckets> }.
+// Also accepts the legacy { values: <flat> } shape so a config.yml from before
+// W8 still bootstraps (those values are routed into shared/byMode by ownership).
+function parseNativeConfig(raw: unknown): {
+  modeId?: ModeId;
+  shared: Partial<ValueMap>;
+  byMode: Partial<Record<ModeId, Partial<ValueMap>>>;
+  cookieJar: Record<string, string>;
+} {
+  const out: {
+    modeId?: ModeId;
+    shared: Partial<ValueMap>;
+    byMode: Partial<Record<ModeId, Partial<ValueMap>>>;
+    cookieJar: Record<string, string>;
+  } = { shared: {}, byMode: {}, cookieJar: {} };
+  if (!isRecord(raw)) return out;
+
+  if (typeof raw["modeId"] === "string" && MODE_INDEX.has(raw["modeId"] as ModeId)) {
+    out.modeId = raw["modeId"] as ModeId;
+  }
+
+  const jar = raw["cookieJar"];
+  if (isRecord(jar)) {
+    for (const [k, v] of Object.entries(jar)) {
+      if (typeof v === "string") out.cookieJar[k] = v;
     }
   }
-  return undefined;
-}
 
-function inferModeId(modeEntry: string | undefined, link: string | undefined): ModeId | undefined {
-  switch (modeEntry) {
-    case "music":
-      return "music-track";
-    case "mix":
-      return "collection";
-    case "like":
-      return "creator-liked-posts";
-    case "collect":
-      return "my-favorite-collection";
-    case "post":
-      if (link && /\/(note|gallery)\//.test(link)) return "image-note";
-      if (link && /\/video\/|v\.douyin\.com|iesdouyin\.com|\/share\/video\//.test(link)) {
-        return "single-video";
+  const sharedKeys = new Set(Object.keys(SHARED_DEFAULTS));
+  out.shared = pickValid(raw["shared"], sharedKeys);
+
+  const modes = raw["modes"];
+  if (isRecord(modes)) {
+    for (const def of MODE_DEFINITIONS) {
+      const bucket = modes[def.id];
+      if (!isRecord(bucket)) continue;
+      out.byMode[def.id] = pickValid(bucket, PER_MODE_FIELD_IDS);
+    }
+  }
+
+  // Legacy compatibility: an older config.yml with a flat `values:` map.
+  // Route each entry into the right bucket so existing users keep their data.
+  const legacyValues = raw["values"];
+  if (isRecord(legacyValues)) {
+    for (const [k, v] of Object.entries(legacyValues)) {
+      if (typeof v !== "string" && typeof v !== "boolean" && typeof v !== "number") continue;
+      if (isPerModeField(k)) {
+        // Without a hint, fold legacy per-mode values into EVERY mode's bucket
+        // (matches the old flat semantics where one key served all). The user
+        // can then edit per-mode in the TUI.
+        for (const def of MODE_DEFINITIONS) {
+          const cur = out.byMode[def.id] ?? {};
+          // Only fill in keys that mode actually owns (e.g. don't put videoUrl
+          // in the Collection bucket).
+          if (defOwnsField(def.id, k)) {
+            (cur as Record<string, unknown>)[k] = v;
+            out.byMode[def.id] = cur;
+          }
+        }
+      } else if (sharedKeys.has(k)) {
+        (out.shared as Record<string, unknown>)[k] = v;
       }
-      return undefined;
-    default:
-      return undefined;
+    }
   }
+
+  return out;
 }
 
-function mapConfigToValues(rawConfig: unknown): Pick<StartupConfigState, "modeId" | "values"> {
-  if (!isRecord(rawConfig)) return { modeId: undefined, values: {} };
-
-  const link = readFirstLink(rawConfig.link);
-  const modeEntry = readModeEntry(rawConfig.mode);
-  const modeId = inferModeId(modeEntry, link);
-  const numberConfig = isRecord(rawConfig.number) ? rawConfig.number : {};
-  const increaseConfig = isRecord(rawConfig.increase) ? rawConfig.increase : {};
-  const progressConfig = isRecord(rawConfig.progress) ? rawConfig.progress : {};
-  const transcriptConfig = isRecord(rawConfig.transcript) ? rawConfig.transcript : {};
-  const cookiesConfig = isRecord(rawConfig.cookies) ? rawConfig.cookies : {};
-
-  const values: Partial<ValueMap> = {};
-  if (link && modeId) {
-    // Write the link into the mode-specific URL key (videoUrl / noteUrl / …)
-    // so config-loaded URLs end up in the same field the user would type
-    // them into.
-    values[urlFieldForMode(modeId)] = link;
-  }
-
-  const pathValue = readStringValue(rawConfig.path);
-  if (pathValue !== undefined) values.savePath = pathValue;
-
-  const includeMusic = readBooleanValue(rawConfig.music);
-  if (includeMusic !== undefined) values.includeMusic = includeMusic;
-
-  const includeCover = readBooleanValue(rawConfig.cover);
-  if (includeCover !== undefined) values.includeCover = includeCover;
-
-  const includeAvatar = readBooleanValue(rawConfig.avatar);
-  if (includeAvatar !== undefined) values.includeAvatar = includeAvatar;
-
-  const includeJson = readBooleanValue(rawConfig.json);
-  if (includeJson !== undefined) values.includeJson = includeJson;
-
-  const startTime = readStringValue(rawConfig.start_time);
-  if (startTime !== undefined) values.startTime = startTime;
-
-  const endTime = readStringValue(rawConfig.end_time);
-  if (endTime !== undefined) values.endTime = endTime;
-
-  const thread = readStringValue(rawConfig.thread);
-  if (thread !== undefined) values.thread = thread;
-
-  const retryTimes = readStringValue(rawConfig.retry_times);
-  if (retryTimes !== undefined) values.retryTimes = retryTimes;
-
-  const proxy = readStringValue(rawConfig.proxy);
-  if (proxy !== undefined) values.proxy = proxy;
-
-  const useDatabase = readBooleanValue(rawConfig.database);
-  if (useDatabase !== undefined) values.useDatabase = useDatabase;
-
-  const databasePath = readStringValue(rawConfig.database_path);
-  if (databasePath !== undefined) values.databasePath = databasePath;
-
-  const quietLogs = readBooleanValue(progressConfig.quiet_logs);
-  if (quietLogs !== undefined) values.quietLogs = quietLogs;
-
-  const transcriptEnabled = readBooleanValue(transcriptConfig.enabled);
-  if (transcriptEnabled !== undefined) values.transcriptEnabled = transcriptEnabled;
-
-  const transcriptApiKey = readStringValue(transcriptConfig.api_key);
-  if (transcriptApiKey !== undefined) values.transcriptApiKey = transcriptApiKey;
-
-  const msToken = readStringValue(cookiesConfig.msToken);
-  if (msToken !== undefined) values.msToken = msToken;
-
-  const ttwid = readStringValue(cookiesConfig.ttwid);
-  if (ttwid !== undefined) values.ttwid = ttwid;
-
-  const odinTt = readStringValue(cookiesConfig.odin_tt);
-  if (odinTt !== undefined) values.odin_tt = odinTt;
-
-  const passportCsrfToken = readStringValue(cookiesConfig.passport_csrf_token);
-  if (passportCsrfToken !== undefined) values.passportCsrfToken = passportCsrfToken;
-
-  const sidGuard = readStringValue(cookiesConfig.sid_guard);
-  if (sidGuard !== undefined) values.sidGuard = sidGuard;
-
-  if (modeId === "collection") {
-    const limit = readStringValue(numberConfig.mix);
-    if (limit !== undefined) values.limit = limit;
-  } else if (modeId === "creator-liked-posts") {
-    const limit = readStringValue(numberConfig.like);
-    if (limit !== undefined) values.limit = limit;
-    const incremental = readBooleanValue(increaseConfig.like);
-    if (incremental !== undefined) values.incremental = incremental;
-  } else if (modeId === "my-favorite-collection") {
-    const limit = readStringValue(numberConfig.collect);
-    if (limit !== undefined) values.limit = limit;
-  }
-
-  return { modeId, values };
+// Does this mode actually expose `fieldId`? Cheap lookup against MODE_DEFINITIONS.
+function defOwnsField(modeId: ModeId, fieldId: string): boolean {
+  const def = MODE_INDEX.get(modeId);
+  if (!def) return false;
+  return def.fields.some((f) => f.id === fieldId);
 }
 
-export async function bootstrapProjectConfig(
-  projectRoot: string,
-  downloaderRoot: string,
-): Promise<StartupConfigState> {
+export async function bootstrapProjectConfig(projectRoot: string): Promise<StartupConfigState> {
   const configPath = path.join(projectRoot, "config.yml");
+  const examplePath = path.join(projectRoot, "config.example.yml");
   let createdFromExample = false;
 
+  // 1. Ensure ./config.yml exists, copying from ./config.example.yml if not.
   try {
     await fs.access(configPath);
   } catch {
-    const examplePath = path.join(downloaderRoot, "config.example.yml");
     try {
       await fs.copyFile(examplePath, configPath);
       createdFromExample = true;
@@ -218,29 +155,35 @@ export async function bootstrapProjectConfig(
       return {
         configPath,
         createdFromExample: false,
-        values: {},
-        status: "No config.yml found",
+        shared: {},
+        byMode: {},
+        cookieJar: {},
+        status: "No config.yml; config.example.yml missing too",
       };
     }
   }
 
+  // 2. Parse the native schema.
   try {
-    const fileContents = await fs.readFile(configPath, "utf8");
-    const parsed = YAML.parse(fileContents);
-    const mapped = mapConfigToValues(parsed);
+    const text = await fs.readFile(configPath, "utf8");
+    const parsed = parseNativeConfig(YAML.parse(text));
     return {
       configPath,
       createdFromExample,
-      modeId: mapped.modeId,
-      values: mapped.values,
+      modeId: parsed.modeId,
+      shared: parsed.shared,
+      byMode: parsed.byMode,
+      cookieJar: parsed.cookieJar,
       status: createdFromExample ? "Created config.yml from example" : "Loaded config.yml",
     };
-  } catch {
+  } catch (err) {
     return {
       configPath,
       createdFromExample,
-      values: {},
-      status: "Failed to load config.yml",
+      shared: {},
+      byMode: {},
+      cookieJar: {},
+      status: `Failed to parse config.yml: ${err instanceof Error ? err.message : String(err)}`,
     };
   }
 }

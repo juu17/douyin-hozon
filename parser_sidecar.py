@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """JSON-line stdio sidecar wrapping douyin-downloader/core/api_client.py.
 
+BREAK-GLASS — NOT the default path. DO NOT DELETE. As of Wave 4 the runtime is
+pure TypeScript (src/engine/native/*); this sidecar is spawned ONLY when the
+user sets DOUYIN_HOZON_PARSER=sidecar to fall back to upstream's Python signing
+after a douyin anti-bot bump that outpaces the native port. See README
+"Break-glass" and src/engine/native/dispatch.ts.
+
 The TUI (Node) spawns this once at startup, sends an `init` request to
 configure cookies and proxy, then issues parse-only method calls. All other
 concerns (download, file IO, DB, progress) live in the Node engine.

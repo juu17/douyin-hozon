@@ -1,0 +1,739 @@
+{
+  "tallyFormatVersion": "1.0",
+  "vendorRepo": "jiji262/douyin-downloader",
+  "vendorCommit": "c3ff1df2c52cd1122eefffd6e5ebad61e957b045",
+  "baselinedAt": "2026-05-27",
+  "scope": "consumed-only",
+  "symbols": {
+    "auth/ms_token_manager.py::MsTokenManager.__init__": {
+      "module": "auth/ms_token_manager.py",
+      "qualname": "MsTokenManager.__init__",
+      "kind": "method",
+      "async": false,
+      "decorators": [],
+      "params": [
+        {
+          "name": "user_agent",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "conf_url",
+          "annotation": "Optional[str]",
+          "default": "None",
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "timeout_seconds",
+          "annotation": "int",
+          "default": "15",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": null,
+      "bases": [],
+      "digest": "7a815ecbce11eb680875f7116d7ac3ff5e76f404b4db59572237686a462b3d1a"
+    },
+    "auth/ms_token_manager.py::MsTokenManager.ensure_ms_token": {
+      "module": "auth/ms_token_manager.py",
+      "qualname": "MsTokenManager.ensure_ms_token",
+      "kind": "method",
+      "async": false,
+      "decorators": [],
+      "params": [
+        {
+          "name": "cookies",
+          "annotation": "Dict[str,str]",
+          "default": null,
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "str",
+      "bases": [],
+      "digest": "0a60324f48009c9bde61a9ce6cae6e0d2a7fd93fefc67f850ce698885a210318"
+    },
+    "core/api_client.py::DouyinAPIClient.__init__": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.__init__",
+      "kind": "method",
+      "async": false,
+      "decorators": [],
+      "params": [
+        {
+          "name": "cookies",
+          "annotation": "Dict[str,str]",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "proxy",
+          "annotation": "Optional[str]",
+          "default": "None",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": null,
+      "bases": [],
+      "digest": "ed8dd9a00f03b1cce8d7ea0e2aa0046710f2839001ceba8252aeba8f9bb54155"
+    },
+    "core/api_client.py::DouyinAPIClient.build_signed_path": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.build_signed_path",
+      "kind": "method",
+      "async": false,
+      "decorators": [],
+      "params": [
+        {
+          "name": "path",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "params",
+          "annotation": "Dict[str,Any]",
+          "default": null,
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Tuple[str,str]",
+      "bases": [],
+      "digest": "81de8ac2765e9fbdcc65cf23f5b67390bb120d4cb0132d13472abf7979c2621b"
+    },
+    "core/api_client.py::DouyinAPIClient.collect_user_post_ids_via_browser": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.collect_user_post_ids_via_browser",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "sec_uid",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "expected_count",
+          "annotation": "int",
+          "default": "0",
+          "kind": "keyword_only"
+        },
+        {
+          "name": "headless",
+          "annotation": "bool",
+          "default": "False",
+          "kind": "keyword_only"
+        },
+        {
+          "name": "idle_rounds",
+          "annotation": "int",
+          "default": "8",
+          "kind": "keyword_only"
+        },
+        {
+          "name": "max_scrolls",
+          "annotation": "int",
+          "default": "240",
+          "kind": "keyword_only"
+        },
+        {
+          "name": "wait_timeout_seconds",
+          "annotation": "int",
+          "default": "600",
+          "kind": "keyword_only"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "List[str]",
+      "bases": [],
+      "digest": "5b4d7d74be788daab11d334949eb7a9bf44e2be1699520210eb1bd09365a5479"
+    },
+    "core/api_client.py::DouyinAPIClient.get_collect_aweme": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.get_collect_aweme",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "collects_id",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "max_cursor",
+          "annotation": "int",
+          "default": "0",
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "count",
+          "annotation": "int",
+          "default": "10",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Dict[str,Any]",
+      "bases": [],
+      "digest": "291cc5b4e2889ad60a7f6c3cc37b6e83a345ff4b65e0df85a8488393b6596087"
+    },
+    "core/api_client.py::DouyinAPIClient.get_mix_aweme": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.get_mix_aweme",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "mix_id",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "cursor",
+          "annotation": "int",
+          "default": "0",
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "count",
+          "annotation": "int",
+          "default": "20",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Dict[str,Any]",
+      "bases": [],
+      "digest": "8c54505eb145cddf32e02b06b6796512aaed9dcce3cdf84287f29c54aec38d33"
+    },
+    "core/api_client.py::DouyinAPIClient.get_mix_detail": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.get_mix_detail",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "mix_id",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Optional[Dict[str,Any]]",
+      "bases": [],
+      "digest": "4bbcc8a01179ca79db9058a59ca09ff2c5a797b355b522a3d442ce94459ecf94"
+    },
+    "core/api_client.py::DouyinAPIClient.get_music_detail": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.get_music_detail",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "music_id",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Optional[Dict[str,Any]]",
+      "bases": [],
+      "digest": "d236a6836dd3df78c8a4635877a6d83a5fac8f87f7095aee9302683e725ef9cd"
+    },
+    "core/api_client.py::DouyinAPIClient.get_user_collect_mix": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.get_user_collect_mix",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "sec_uid",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "max_cursor",
+          "annotation": "int",
+          "default": "0",
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "count",
+          "annotation": "int",
+          "default": "12",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Dict[str,Any]",
+      "bases": [],
+      "digest": "70de413104727d684cb0b35c502cb886a270becf3f608c1d188e0d7edf14d4fb"
+    },
+    "core/api_client.py::DouyinAPIClient.get_user_collects": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.get_user_collects",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "sec_uid",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "max_cursor",
+          "annotation": "int",
+          "default": "0",
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "count",
+          "annotation": "int",
+          "default": "10",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Dict[str,Any]",
+      "bases": [],
+      "digest": "c6981ba4961d828d129e515f8b8b0c3f1ff0679e73feb954f23879178c34e63d"
+    },
+    "core/api_client.py::DouyinAPIClient.get_user_info": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.get_user_info",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "sec_uid",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Optional[Dict[str,Any]]",
+      "bases": [],
+      "digest": "b2b8d2ab447b79be892f95f68399d026c6fec31d8afcdce16fb097882f27614e"
+    },
+    "core/api_client.py::DouyinAPIClient.get_user_like": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.get_user_like",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "sec_uid",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "max_cursor",
+          "annotation": "int",
+          "default": "0",
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "count",
+          "annotation": "int",
+          "default": "20",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Dict[str,Any]",
+      "bases": [],
+      "digest": "bb4dfc8dc3b0e4effcec83081c802e7363ca59e0d17c90317b199ca886315c4f"
+    },
+    "core/api_client.py::DouyinAPIClient.get_user_mix": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.get_user_mix",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "sec_uid",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "max_cursor",
+          "annotation": "int",
+          "default": "0",
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "count",
+          "annotation": "int",
+          "default": "20",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Dict[str,Any]",
+      "bases": [],
+      "digest": "1e96c74484028b60d245ef4a8d839e9bd72011cb44dad86c598b12a08afddcba"
+    },
+    "core/api_client.py::DouyinAPIClient.get_user_music": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.get_user_music",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "sec_uid",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "max_cursor",
+          "annotation": "int",
+          "default": "0",
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "count",
+          "annotation": "int",
+          "default": "20",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Dict[str,Any]",
+      "bases": [],
+      "digest": "c413a0996e3af576910c9f73fb4016b88aadb75054ae84bdb030de1084a327c9"
+    },
+    "core/api_client.py::DouyinAPIClient.get_user_post": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.get_user_post",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "sec_uid",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "max_cursor",
+          "annotation": "int",
+          "default": "0",
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "count",
+          "annotation": "int",
+          "default": "20",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Dict[str,Any]",
+      "bases": [],
+      "digest": "f953b046a9e992b9d62434c77b4a05e16b3949155f4a40d7fbc899a09430f88c"
+    },
+    "core/api_client.py::DouyinAPIClient.get_video_detail": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.get_video_detail",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "aweme_id",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "suppress_error",
+          "annotation": "bool",
+          "default": "False",
+          "kind": "keyword_only"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Optional[Dict[str,Any]]",
+      "bases": [],
+      "digest": "4fce016ec06ef81003f4bbefd7032d5e54ac660849a30443df7ebe1b27389aa8"
+    },
+    "core/api_client.py::DouyinAPIClient.resolve_short_url": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.resolve_short_url",
+      "kind": "method",
+      "async": true,
+      "decorators": [],
+      "params": [
+        {
+          "name": "short_url",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "timeout_seconds",
+          "annotation": "float",
+          "default": "10.0",
+          "kind": "keyword_only"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Optional[str]",
+      "bases": [],
+      "digest": "39c60380c518b2b2ece51475275c2bd59941008a3b971c321515ed0aa1af8143"
+    },
+    "core/api_client.py::DouyinAPIClient.sign_url": {
+      "module": "core/api_client.py",
+      "qualname": "DouyinAPIClient.sign_url",
+      "kind": "method",
+      "async": false,
+      "decorators": [],
+      "params": [
+        {
+          "name": "url",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Tuple[str,str]",
+      "bases": [],
+      "digest": "8a5c4d0577f31b702f8cc7a24e964a16e50a85223ba64bfe5b3d0e593e15df8d"
+    },
+    "core/url_parser.py::URLParser.parse": {
+      "module": "core/url_parser.py",
+      "qualname": "URLParser.parse",
+      "kind": "staticmethod",
+      "async": false,
+      "decorators": [
+        "staticmethod"
+      ],
+      "params": [
+        {
+          "name": "url",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Optional[Dict[str,Any]]",
+      "bases": [],
+      "digest": "85c0df62dc59ebdef33a81cc7b2a318b0b5abcb20dfd4315859a2898669fe9cf"
+    },
+    "utils/abogus.py::ABogus.__init__": {
+      "module": "utils/abogus.py",
+      "qualname": "ABogus.__init__",
+      "kind": "method",
+      "async": false,
+      "decorators": [],
+      "params": [
+        {
+          "name": "fp",
+          "annotation": "str",
+          "default": "''",
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "user_agent",
+          "annotation": "str",
+          "default": "''",
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "options",
+          "annotation": "List[int]",
+          "default": "[0, 1, 14]",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": null,
+      "bases": [],
+      "digest": "a1097d75db5fd486e24e1bd0d4c8cfddf44939d577ef17429babbed7a2533ba2"
+    },
+    "utils/abogus.py::ABogus.generate_abogus": {
+      "module": "utils/abogus.py",
+      "qualname": "ABogus.generate_abogus",
+      "kind": "method",
+      "async": false,
+      "decorators": [],
+      "params": [
+        {
+          "name": "params",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "body",
+          "annotation": "str",
+          "default": "''",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "tuple",
+      "bases": [],
+      "digest": "76d3b408b0aadeaf990ea35b8b6013f670525cc3e6022c5666754167eae808c2"
+    },
+    "utils/abogus.py::BrowserFingerprintGenerator.generate_fingerprint": {
+      "module": "utils/abogus.py",
+      "qualname": "BrowserFingerprintGenerator.generate_fingerprint",
+      "kind": "classmethod",
+      "async": false,
+      "decorators": [
+        "classmethod"
+      ],
+      "params": [
+        {
+          "name": "browser_type",
+          "annotation": "str",
+          "default": "'Edge'",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "str",
+      "bases": [],
+      "digest": "ef5864f5778b9b86e3f7dde9fd44fa450199f892f52526c9fe16f37b907edbb5"
+    },
+    "utils/validators.py::parse_url_type": {
+      "module": "utils/validators.py",
+      "qualname": "parse_url_type",
+      "kind": "function",
+      "async": false,
+      "decorators": [],
+      "params": [
+        {
+          "name": "url",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Optional[str]",
+      "bases": [],
+      "digest": "44c54afd8ec2afe3c772d37fe216c754bc0cc549e0f42bf9a6bdb626af4e45cf"
+    },
+    "utils/validators.py::sanitize_filename": {
+      "module": "utils/validators.py",
+      "qualname": "sanitize_filename",
+      "kind": "function",
+      "async": false,
+      "decorators": [],
+      "params": [
+        {
+          "name": "filename",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        },
+        {
+          "name": "max_length",
+          "annotation": "int",
+          "default": "80",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "str",
+      "bases": [],
+      "digest": "4925aeca91d5608dc3570794e0ae22c803b76e1aec21d95e88c70fdf5a3f5338"
+    },
+    "utils/xbogus.py::XBogus.__init__": {
+      "module": "utils/xbogus.py",
+      "qualname": "XBogus.__init__",
+      "kind": "method",
+      "async": false,
+      "decorators": [],
+      "params": [
+        {
+          "name": "user_agent",
+          "annotation": "Optional[str]",
+          "default": "None",
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "None",
+      "bases": [],
+      "digest": "891dfd371fdb7243f4087ba1a7c320f84d45725689bbf002cb5eb52ab18174a3"
+    },
+    "utils/xbogus.py::XBogus.build": {
+      "module": "utils/xbogus.py",
+      "qualname": "XBogus.build",
+      "kind": "method",
+      "async": false,
+      "decorators": [],
+      "params": [
+        {
+          "name": "url",
+          "annotation": "str",
+          "default": null,
+          "kind": "positional_or_keyword"
+        }
+      ],
+      "vararg": null,
+      "kwarg": null,
+      "returns": "Tuple[str,str,str]",
+      "bases": [],
+      "digest": "5da29bd16bb4e3182f22412d735e960e1be5a9c6584687ad90f473fc7d388b2f"
+    }
+  }
+}

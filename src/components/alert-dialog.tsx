@@ -21,11 +21,14 @@ export function AlertDialog() {
   if (!alert) return null;
 
   return (
-    <Dialog title={alert.title} width={72} height={9}>
-      <Box flexDirection="column" flexGrow={1}>
+    // No fixed height — alert content varies (one line for "Validation Error",
+    // ~7 lines for "Cookies Captured"). A fixed height pushed the OK button
+    // past the right border once the message exceeded the content area.
+    <Dialog title={alert.title} width={72}>
+      <Box flexDirection="column">
         <Text color={THEME.text}>{alert.message}</Text>
       </Box>
-      <Box justifyContent="flex-end">
+      <Box justifyContent="flex-end" marginTop={1}>
         <Button label="OK" focused enabled />
       </Box>
     </Dialog>

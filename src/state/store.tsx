@@ -1,5 +1,13 @@
 import React, { createContext, useContext, useMemo, useReducer } from "react";
-import { createInitialValues, MODE_DEFINITIONS, type ModeId, type ValueMap } from "../modes.js";
+import {
+  DEFAULT_VALUES,
+  isPerModeField,
+  MODE_DEFINITIONS,
+  PER_MODE_DEFAULTS,
+  SHARED_DEFAULTS,
+  type ModeId,
+  type ValueMap,
+} from "../modes.js";
 
 export type PanelFocus = "mode" | "task";
 
@@ -10,9 +18,18 @@ export interface AlertPayload {
   message: string;
 }
 
-export interface AppState {
+// CoreState is what the reducer operates on. AppState (below) extends it with
+// a DERIVED `values` flat map that's recomputed in the StoreProvider — that
+// derived shape is what every component reads, so nothing downstream had to
+// change when we split the buckets.
+interface CoreState {
   modeId: ModeId;
-  values: ValueMap;
+  // Fields used by every mode (savePath, the include* toggles, thread, proxy,
+  // manual cookies, …). One value, applies everywhere.
+  shared: Partial<ValueMap>;
+  // Each mode's own remembered field values (its URL field, limit, dates).
+  // Switching modes restores that mode's bucket without affecting the others.
+  byMode: Record<ModeId, Partial<ValueMap>>;
   panelFocus: PanelFocus;
   taskIndex: number;
   editingFieldId: string | null;
@@ -30,10 +47,24 @@ export interface AppState {
   cookieJar: Record<string, string> | null;   // populated by Capture Cookies
 }
 
+// Public shape exposed via context. Consumers continue to read `state.values`;
+// `shared` + `byMode` are the source-of-truth buckets and `values` is recomputed
+// whenever any of them changes.
+export interface AppState extends CoreState {
+  values: ValueMap;
+}
+
 export type Action =
   | { type: "SET_MODE"; modeId: ModeId }
   | { type: "SET_VALUE"; id: string; value: string | boolean }
   | { type: "MERGE_VALUES"; values: Partial<ValueMap> }
+  | {
+      type: "LOAD_CONFIG";
+      modeId?: ModeId;
+      shared?: Partial<ValueMap>;
+      byMode?: Partial<Record<ModeId, Partial<ValueMap>>>;
+      cookieJar?: Record<string, string> | null;
+    }
   | { type: "FOCUS_PANEL"; panel: PanelFocus }
   | { type: "SET_TASK_INDEX"; index: number }
   | { type: "START_EDIT"; id: string }
@@ -46,9 +77,32 @@ export type Action =
   | { type: "SET_COOKIE_CAPTURE_ACTIVE"; active: boolean }
   | { type: "SET_COOKIE_JAR"; jar: Record<string, string> | null };
 
-export const INITIAL_STATE: AppState = {
+// Recompute the flat `values` map from the per-mode + shared buckets. This is
+// the ONE place the back-compat surface is rebuilt; consumers keep reading
+// `state.values[id]` without knowing about the split.
+function deriveValues(modeId: ModeId, shared: Partial<ValueMap>, byMode: Record<ModeId, Partial<ValueMap>>): ValueMap {
+  // DEFAULT_VALUES fully populates every key with a defined value; the Partial
+  // overlays only contain DEFINED entries (we never store `undefined`), so the
+  // runtime shape always satisfies the ValueMap contract. The cast tells TS
+  // about that — spreading Partial into ValueMap otherwise widens to undefined.
+  return { ...DEFAULT_VALUES, ...shared, ...(byMode[modeId] ?? {}) } as ValueMap;
+}
+
+function withValues(state: AppState): AppState {
+  return { ...state, values: deriveValues(state.modeId, state.shared, state.byMode) };
+}
+
+const INITIAL_BY_MODE: Record<ModeId, Partial<ValueMap>> = (() => {
+  const out = {} as Record<ModeId, Partial<ValueMap>>;
+  for (const def of MODE_DEFINITIONS) out[def.id] = { ...PER_MODE_DEFAULTS[def.id] };
+  return out;
+})();
+
+export const INITIAL_STATE: AppState = withValues({
   modeId: MODE_DEFINITIONS[0]!.id,
-  values: createInitialValues(),
+  shared: { ...SHARED_DEFAULTS },
+  byMode: INITIAL_BY_MODE,
+  values: {} as ValueMap, // derived below by withValues
   panelFocus: "mode",
   taskIndex: 0,
   editingFieldId: null,
@@ -59,17 +113,7 @@ export const INITIAL_STATE: AppState = {
   downloadActive: false,
   cookieCaptureActive: false,
   cookieJar: null,
-};
-
-// Single source of truth for the `incremental → useDatabase` invariant.
-// Applied by both SET_VALUE and MERGE_VALUES so config-load (which uses
-// MERGE_VALUES) and direct toggles produce the same result.
-function applyIncrementalRule(values: ValueMap): ValueMap {
-  if (values.incremental === true && values.useDatabase !== true) {
-    return { ...values, useDatabase: true };
-  }
-  return values;
-}
+});
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -79,19 +123,57 @@ function reducer(state: AppState, action: Action): AppState {
       // the current mode's URL field (videoUrl / noteUrl / …) and values.
       // Caller should cancel first.
       if (state.downloadActive) return state;
-      return { ...state, modeId: action.modeId, taskIndex: 0, editingFieldId: null };
+      return withValues({ ...state, modeId: action.modeId, taskIndex: 0, editingFieldId: null });
     case "SET_VALUE": {
       if (state.values[action.id] === action.value) return state;
-      const next: ValueMap = { ...state.values };
-      next[action.id] = action.value;
-      return { ...state, values: applyIncrementalRule(next) };
+      if (isPerModeField(action.id)) {
+        const cur = state.byMode[state.modeId] ?? {};
+        const nextBucket: Partial<ValueMap> = { ...cur, [action.id]: action.value };
+        return withValues({ ...state, byMode: { ...state.byMode, [state.modeId]: nextBucket } });
+      }
+      const nextShared: Partial<ValueMap> = { ...state.shared, [action.id]: action.value };
+      return withValues({ ...state, shared: nextShared });
     }
     case "MERGE_VALUES": {
-      const merged: ValueMap = { ...state.values };
+      // Split entries by ownership; only mutate buckets that actually change.
+      let sharedDirty = false;
+      let bucketDirty = false;
+      const nextShared: Partial<ValueMap> = { ...state.shared };
+      const curBucket = state.byMode[state.modeId] ?? {};
+      const nextBucket: Partial<ValueMap> = { ...curBucket };
       for (const [k, v] of Object.entries(action.values)) {
-        if (v !== undefined) merged[k] = v;
+        if (v === undefined) continue;
+        if (isPerModeField(k)) {
+          (nextBucket as Record<string, unknown>)[k] = v;
+          bucketDirty = true;
+        } else {
+          (nextShared as Record<string, unknown>)[k] = v;
+          sharedDirty = true;
+        }
       }
-      return { ...state, values: applyIncrementalRule(merged) };
+      if (!sharedDirty && !bucketDirty) return state;
+      return withValues({
+        ...state,
+        shared: sharedDirty ? nextShared : state.shared,
+        byMode: bucketDirty ? { ...state.byMode, [state.modeId]: nextBucket } : state.byMode,
+      });
+    }
+    case "LOAD_CONFIG": {
+      let next = state;
+      if (action.modeId && action.modeId !== state.modeId) {
+        next = { ...next, modeId: action.modeId, taskIndex: 0, editingFieldId: null };
+      }
+      if (action.shared) next = { ...next, shared: { ...next.shared, ...action.shared } };
+      if (action.byMode) {
+        const merged: Record<ModeId, Partial<ValueMap>> = { ...next.byMode };
+        for (const [m, vals] of Object.entries(action.byMode)) {
+          if (!vals) continue;
+          merged[m as ModeId] = { ...(merged[m as ModeId] ?? {}), ...vals };
+        }
+        next = { ...next, byMode: merged };
+      }
+      if (action.cookieJar !== undefined) next = { ...next, cookieJar: action.cookieJar };
+      return withValues(next);
     }
     case "FOCUS_PANEL":
       if (state.panelFocus === action.panel) return state;

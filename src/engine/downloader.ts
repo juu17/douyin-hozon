@@ -9,8 +9,20 @@ import {
 } from "./file-layout.js";
 import { fetchAndWrite } from "./fetcher.js";
 import { runBounded } from "./concurrency.js";
-import { transcribeVideo } from "./transcribe.js";
-import type { DedupeDb } from "./db.js";
+import {
+  dispatchExtractAwemeAssets,
+  dispatchExtractMusicAssets,
+  dispatchGetCollectAweme,
+  dispatchGetMixAweme,
+  dispatchGetMusicDetail,
+  dispatchGetUserCollects,
+  dispatchGetUserLike,
+  dispatchGetVideoDetail,
+  dispatchParseUrl,
+  dispatchResolveShortUrl,
+  type DispatchCtx,
+} from "./native/dispatch.js";
+import type { NativeDouyinApiClient } from "./native/api-client.js";
 import type { ProgressBus } from "./progress.js";
 import type {
   AssetSpec,
@@ -25,13 +37,6 @@ export interface DownloadFlags {
   music: boolean;
   avatar: boolean;
   json: boolean;
-  transcript?: boolean;
-}
-
-export interface TranscriptConfig {
-  apiKey: string;
-  model?: string;
-  apiUrl?: string;
 }
 
 export interface DateFilter {
@@ -48,16 +53,19 @@ export interface ItemOutcome {
 }
 
 export interface DownloaderOptions {
-  client: ParserClient;
+  // null in native mode (default) — the sidecar isn't started. Present only
+  // when DOUYIN_HOZON_PARSER=sidecar (break-glass).
+  client: ParserClient | null;
+  // Native signed HTTP client; present (and used) in native mode. The dispatch
+  // helpers route to it.
+  nativeClient?: NativeDouyinApiClient | null;
   baseDir: string;            // e.g. "./Downloaded"
   modeFolder: string;         // "post" | "like" | "mix" | "music" | "collect"
   flags: DownloadFlags;
   parallelism?: number;       // default 5
   bus?: ProgressBus;
-  db?: DedupeDb;              // optional dedup; pass to enable Incremental
   dateFilter?: DateFilter;
   itemLimit?: number;         // 0 = no limit
-  transcript?: TranscriptConfig;
   signal?: AbortSignal;       // engine-wide cancel for in-flight HTTP fetches
 }
 
@@ -168,19 +176,6 @@ export async function downloadAweme(
       written.push(out);
     }
 
-    if (
-      options.flags.transcript &&
-      options.transcript?.apiKey &&
-      bundle.media_type === "video"
-    ) {
-      const videoPath = written.find((p) => p.endsWith(".mp4"));
-      if (videoPath) {
-        const result = await transcribeVideo(videoPath, itemDir, options.transcript);
-        if (result.textPath) written.push(result.textPath);
-        if (result.jsonPath) written.push(result.jsonPath);
-      }
-    }
-
     options.bus?.emitProgress({ kind: "item-done", success: true, pathHint: itemDir });
     return { aweme_id: bundle.aweme_id, ok: true, paths: written };
   } catch (err) {
@@ -242,9 +237,14 @@ export async function downloadMusicTrack(
   }
 }
 
+// Bundle the two backends the dispatch helpers choose between.
+export function ctxOf(options: DownloaderOptions): DispatchCtx {
+  return { client: options.client, native: options.nativeClient ?? null };
+}
+
 // Resolve a possibly-short URL into a parsed kind+id payload.
 export async function parseInputUrl(
-  client: ParserClient,
+  ctx: DispatchCtx,
   rawUrl: string,
 ): Promise<ParsedUrl> {
   const trimmed = rawUrl.trim();
@@ -252,16 +252,17 @@ export async function parseInputUrl(
 
   // Mirror upstream's is_short_url heuristic — host check is enough.
   if (looksLikeShortUrl(trimmed)) {
-    const longUrl = await client.call<string | null>("resolve_short_url", {
-      short_url: trimmed.startsWith("http") ? trimmed : `https://${trimmed}`,
-    });
+    const longUrl = await dispatchResolveShortUrl(
+      ctx,
+      trimmed.startsWith("http") ? trimmed : `https://${trimmed}`,
+    );
     if (!longUrl) {
       throw new Error(`Short URL did not resolve: ${trimmed}`);
     }
     resolved = longUrl;
   }
 
-  const parsed = await client.parseUrl(resolved);
+  const parsed = await dispatchParseUrl(ctx, resolved);
   if (!parsed) {
     throw new Error(`Unsupported douyin URL: ${resolved}`);
   }
@@ -288,7 +289,7 @@ export async function runSingleAweme(
   options: DownloaderOptions,
 ): Promise<ItemOutcome> {
   options.bus?.emitProgress({ kind: "stage", stage: "parsing" });
-  const parsed = await parseInputUrl(options.client, rawUrl);
+  const parsed = await parseInputUrl(ctxOf(options), rawUrl);
   if (parsed.type !== "video" && parsed.type !== "gallery") {
     throw new Error(`Expected single-aweme URL, got type=${parsed.type}`);
   }
@@ -296,15 +297,12 @@ export async function runSingleAweme(
   if (!awemeId) throw new Error(`Could not extract aweme_id from ${rawUrl}`);
 
   options.bus?.emitProgress({ kind: "stage", stage: "fetching", detail: awemeId });
-  const detail = await options.client.call<Record<string, unknown> | null>(
-    "get_video_detail",
-    { aweme_id: awemeId },
-  );
+  const detail = await dispatchGetVideoDetail(ctxOf(options), awemeId);
   if (!detail) throw new Error(`Aweme ${awemeId} returned no detail (filtered or removed?)`);
 
-  const bundle = await options.client.call<AwemeAssetBundle>("extract_aweme_assets", {
-    aweme_data: detail,
-  });
+  const bundle = await dispatchExtractAwemeAssets(ctxOf(options), detail, (reason) =>
+    options.bus?.emitProgress({ kind: "stage", stage: "fetching", detail: `[native→sidecar] ${reason}` }),
+  );
 
   options.bus?.emitProgress({ kind: "stage", stage: "writing" });
   const outcome = await downloadAweme(bundle, options);
@@ -324,7 +322,7 @@ export async function runMusicTrack(
   options: DownloaderOptions,
 ): Promise<ItemOutcome> {
   options.bus?.emitProgress({ kind: "stage", stage: "parsing" });
-  const parsed = await parseInputUrl(options.client, rawUrl);
+  const parsed = await parseInputUrl(ctxOf(options), rawUrl);
   if (parsed.type !== "music") {
     throw new Error(`Expected music URL, got type=${parsed.type}`);
   }
@@ -332,15 +330,10 @@ export async function runMusicTrack(
   if (!musicId) throw new Error(`Could not extract music_id from ${rawUrl}`);
 
   options.bus?.emitProgress({ kind: "stage", stage: "fetching", detail: musicId });
-  const detail = await options.client.call<Record<string, unknown> | null>(
-    "get_music_detail",
-    { music_id: musicId },
-  );
+  const detail = await dispatchGetMusicDetail(ctxOf(options), musicId);
   if (!detail) throw new Error(`Music ${musicId} returned no detail`);
 
-  const bundle = await options.client.call<MusicAssetBundle>("extract_music_assets", {
-    music_detail: detail,
-  });
+  const bundle = await dispatchExtractMusicAssets(ctxOf(options), detail);
 
   options.bus?.emitProgress({ kind: "stage", stage: "writing" });
   const outcome = await downloadMusicTrack(bundle, options);
@@ -359,7 +352,7 @@ export async function runMusicTrack(
 // Paginated mode runners
 // ---------------------------------------------------------------------------
 
-interface PaginatedListAweme {
+export interface PaginatedListAweme {
   aweme_id?: string;
   create_time?: number;
   [k: string]: unknown;
@@ -425,23 +418,11 @@ async function downloadAwemeIds(
   const total = ids.length;
   return runBounded(ids, parallelism, async (awemeId) => {
     index += 1;
-    if (options.db?.isDownloaded(awemeId)) {
-      options.bus?.emitProgress({
-        kind: "item-skip",
-        title: awemeId,
-        reason: "already in db",
-      });
-      return { aweme_id: awemeId, ok: true, paths: [], skipped: true };
-    }
-
     options.bus?.emitProgress({ kind: "item-start", title: awemeId, index, total });
 
     let detail: Record<string, unknown> | null;
     try {
-      detail = await options.client.call<Record<string, unknown> | null>(
-        "get_video_detail",
-        { aweme_id: awemeId },
-      );
+      detail = await dispatchGetVideoDetail(ctxOf(options), awemeId);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       options.bus?.emitProgress({ kind: "item-done", success: false, error: message });
@@ -453,25 +434,10 @@ async function downloadAwemeIds(
       return { aweme_id: awemeId, ok: false, paths: [], skipped: true, error: reason };
     }
 
-    const bundle = await options.client.call<AwemeAssetBundle>("extract_aweme_assets", {
-      aweme_data: detail,
-    });
-    const outcome = await downloadAweme(bundle, options);
-
-    if (outcome.ok && options.db) {
-      options.db.addAweme({
-        aweme_id: bundle.aweme_id,
-        aweme_type: bundle.media_type,
-        title: bundle.title,
-        author_id: bundle.author.id,
-        author_name: bundle.author.name,
-        create_time: bundle.publish_ts,
-        file_path: outcome.paths[0] ? path.dirname(outcome.paths[0]) : null,
-        metadata: JSON.stringify(bundle.raw),
-      });
-    }
-
-    return outcome;
+    const bundle = await dispatchExtractAwemeAssets(ctxOf(options), detail, (reason) =>
+      options.bus?.emitProgress({ kind: "stage", stage: "fetching", detail: `[native→sidecar] ${reason}` }),
+    );
+    return downloadAweme(bundle, options);
   });
 }
 
@@ -507,10 +473,10 @@ function emitSummary(options: DownloaderOptions, items: ItemOutcome[]): void {
 }
 
 async function resolveSecUid(
-  client: ParserClient,
+  ctx: DispatchCtx,
   rawUrl: string,
 ): Promise<string> {
-  const parsed = await parseInputUrl(client, rawUrl);
+  const parsed = await parseInputUrl(ctx, rawUrl);
   if (parsed.type !== "user") {
     throw new Error(`Expected /user/{sec_uid} URL, got type=${parsed.type}`);
   }
@@ -518,8 +484,8 @@ async function resolveSecUid(
   return parsed.sec_uid;
 }
 
-async function resolveMixId(client: ParserClient, rawUrl: string): Promise<string> {
-  const parsed = await parseInputUrl(client, rawUrl);
+async function resolveMixId(ctx: DispatchCtx, rawUrl: string): Promise<string> {
+  const parsed = await parseInputUrl(ctx, rawUrl);
   if (parsed.type !== "collection") {
     throw new Error(`Expected /collection/ or /mix/ URL, got type=${parsed.type}`);
   }
@@ -532,17 +498,12 @@ export async function runCollection(
   options: DownloaderOptions,
 ): Promise<ItemOutcome[]> {
   options.bus?.emitProgress({ kind: "stage", stage: "parsing" });
-  const mixId = await resolveMixId(options.client, rawUrl);
+  const mixId = await resolveMixId(ctxOf(options), rawUrl);
 
   options.bus?.emitProgress({ kind: "stage", stage: "fetching", detail: mixId });
   const aweme_list = await collectAwemeList({
     ...options,
-    fetchPage: async (cursor) =>
-      options.client.call<PagedResponse<PaginatedListAweme>>("get_mix_aweme", {
-        mix_id: mixId,
-        cursor,
-        count: 20,
-      }),
+    fetchPage: async (cursor) => dispatchGetMixAweme(ctxOf(options), mixId, cursor, 20),
   });
 
   options.bus?.emitProgress({ kind: "stage", stage: "writing" });
@@ -557,17 +518,12 @@ export async function runCreatorLikedPosts(
   options: DownloaderOptions,
 ): Promise<ItemOutcome[]> {
   options.bus?.emitProgress({ kind: "stage", stage: "parsing" });
-  const secUid = await resolveSecUid(options.client, rawUrl);
+  const secUid = await resolveSecUid(ctxOf(options), rawUrl);
 
   options.bus?.emitProgress({ kind: "stage", stage: "fetching", detail: secUid });
   const aweme_list = await collectAwemeList({
     ...options,
-    fetchPage: async (cursor) =>
-      options.client.call<PagedResponse<PaginatedListAweme>>("get_user_like", {
-        sec_uid: secUid,
-        max_cursor: cursor,
-        count: 20,
-      }),
+    fetchPage: async (cursor) => dispatchGetUserLike(ctxOf(options), secUid, cursor, 20),
   });
 
   options.bus?.emitProgress({ kind: "stage", stage: "writing" });
@@ -589,9 +545,7 @@ export async function runMyFavoriteCollection(
   let page = 0;
   while (true) {
     page += 1;
-    const response = await options.client.call<
-      PagedResponse<{ collects_id?: string; collects_name?: string }>
-    >("get_user_collects", { sec_uid: "self", max_cursor: cursor, count: 10 });
+    const response = await dispatchGetUserCollects(ctxOf(options), "self", cursor, 10);
     for (const item of response.items ?? []) {
       const cid = item?.collects_id;
       if (typeof cid === "string" && cid) {
@@ -616,11 +570,7 @@ export async function runMyFavoriteCollection(
       ...options,
       itemLimit: 0,            // limit applies overall, not per-folder; cap below
       fetchPage: async (innerCursor) =>
-        options.client.call<PagedResponse<PaginatedListAweme>>("get_collect_aweme", {
-          collects_id: folder.collects_id,
-          max_cursor: innerCursor,
-          count: 10,
-        }),
+        dispatchGetCollectAweme(ctxOf(options), folder.collects_id, innerCursor, 10),
     });
     for (const item of items) {
       if (item.aweme_id) allIds.push(item.aweme_id);
