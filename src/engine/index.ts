@@ -4,6 +4,7 @@ import { NativeDouyinApiClient } from "./native/api-client.js";
 import { parserMode } from "./native/dispatch.js";
 import { ProgressBus } from "./progress.js";
 import {
+  DEFAULT_PATH_PREFS,
   parseDateFilter,
   runCollection,
   runCreatorLikedPosts,
@@ -12,6 +13,7 @@ import {
   runSingleAweme,
   type DownloaderOptions,
   type ItemOutcome,
+  type PathPrefs,
 } from "./downloader.js";
 import { defaultSavePath } from "./file-layout.js";
 import { urlFieldForMode } from "../modes.js";
@@ -136,6 +138,7 @@ export class Engine {
         avatar: values.includeAvatar === true,
         json: values.includeJson === true,
       },
+      pathPrefs: readPathPrefs(values),
       bus: this.bus,
       itemLimit: limit,
       dateFilter,
@@ -178,6 +181,20 @@ function parseThread(raw: unknown): number | undefined {
     if (Number.isFinite(n) && n > 0) return n;
   }
   return undefined;
+}
+
+// Boolean reader with a default for legacy configs that pre-date the toggles.
+function readPathPrefs(values: ValueMap): PathPrefs {
+  const get = (id: keyof PathPrefs, valueKey: string): boolean => {
+    const v = values[valueKey];
+    return typeof v === "boolean" ? v : DEFAULT_PATH_PREFS[id];
+  };
+  return {
+    author: get("author", "pathAuthor"),
+    mode: get("mode", "pathMode"),
+    date: get("date", "pathDate"),
+    title: get("title", "pathTitle"),
+  };
 }
 
 export type { ItemOutcome } from "./downloader.js";

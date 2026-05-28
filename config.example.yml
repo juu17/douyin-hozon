@@ -12,7 +12,11 @@ cookieJar: {}
 # Settings that apply across every mode. Change `savePath` here and every mode
 # uses it; toggle `includeMusic` here and it affects all media-mode downloads.
 shared:
-  # Empty `savePath` = ~/Downloads/douyin-hozon
+  # Empty `savePath` = your OS Downloads dir + douyin-hozon/.
+  #   macOS:   ~/Downloads/douyin-hozon/
+  #   Windows: %USERPROFILE%\Downloads\douyin-hozon\
+  #   Linux:   honors $XDG_DOWNLOAD_DIR, then ~/.config/user-dirs.dirs,
+  #            then ~/Downloads, finally ~.
   savePath: ""
   includeCover: true
   includeMusic: true
@@ -20,6 +24,15 @@ shared:
   includeJson: true
   thread: "5"
   retryTimes: "3"
+  # Path Preference — toggles each segment of the download path.
+  #   defaults -> <savePath>/<author>/<title>_<id>/<title>_<id>.mp4 ...
+  #   all-on   -> <savePath>/<author>/<mode>/<date>_<title>_<id>/...
+  #   all-off  -> <savePath>/<id>/<id>.mp4 ...
+  # Untoggling pathDate / pathTitle also drops them from the filename prefix.
+  pathAuthor: true
+  pathMode: false
+  pathDate: false
+  pathTitle: true
   quietLogs: true
   proxy: ""
   # Manual cookie overrides — usually unused; "Capture Cookies" fills cookieJar above.

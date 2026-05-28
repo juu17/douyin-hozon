@@ -9,6 +9,18 @@ import { Field } from "./field.js";
 
 type FocusArea = "fields" | "save";
 
+// Settings field id -> cookieJar key. The "/" Capture-Cookies command writes
+// into cookieJar with douyin's snake_case keys, while the manual-override
+// fields in Settings use camelCase ids — without this map the captured values
+// looked "empty" in Settings even after a successful capture.
+const COOKIE_FALLBACK_KEY: Record<string, string> = {
+  msToken: "msToken",
+  ttwid: "ttwid",
+  odin_tt: "odin_tt",
+  passportCsrfToken: "passport_csrf_token",
+  sidGuard: "sid_guard",
+};
+
 export function SettingsDialog() {
   const { state, dispatch } = useStore();
   const isActive = state.dialog === "settings";
@@ -47,7 +59,7 @@ export function SettingsDialog() {
         }
         if (input === " ") {
           const field = fields[safeIndex];
-          if (field?.kind === "boolean") {
+          if (field?.kind === "boolean" || field?.kind === "path-toggle") {
             setDraft((prev) => mergeBoolean(prev, field.id));
           }
           return;
@@ -55,11 +67,11 @@ export function SettingsDialog() {
         if (key.return) {
           const field = fields[safeIndex];
           if (!field) return;
-          if (field.kind === "boolean") {
+          if (field.kind === "boolean" || field.kind === "path-toggle") {
             setDraft((prev) => mergeBoolean(prev, field.id));
             return;
           }
-          if (field.kind === "text" || field.kind === "number") {
+          if (field.kind === "text" || field.kind === "number" || field.kind === "cookie") {
             setEditingId(field.id);
           }
         }
@@ -81,11 +93,19 @@ export function SettingsDialog() {
         {fields.map((field, idx) => {
           const active = focusArea === "fields" && idx === safeIndex;
           const editing = editingId === field.id;
+          // For the 5 cookie fields, fall back to the captured cookieJar value
+          // when the user hasn't typed an override. Field renders it as a real
+          // value (not a placeholder), so a successful capture is visible.
+          let value: string | boolean = draft[field.id] ?? "";
+          if (value === "" && COOKIE_FALLBACK_KEY[field.id]) {
+            const captured = state.cookieJar?.[COOKIE_FALLBACK_KEY[field.id]!];
+            if (captured) value = captured;
+          }
           return (
             <Field
               key={field.id}
               def={field}
-              value={draft[field.id] ?? ""}
+              value={value}
               active={active}
               editing={editing}
               onCommit={(next) => {

@@ -7,6 +7,7 @@ import {
   inferLiveExtension,
   resolveItemDir,
 } from "./file-layout.js";
+import { sanitizeFilename } from "./native/sanitize.js";
 import { fetchAndWrite } from "./fetcher.js";
 import { runBounded } from "./concurrency.js";
 import {
@@ -52,6 +53,32 @@ export interface ItemOutcome {
   skipped?: boolean;
 }
 
+// 4 booleans driving the Path Preference cluster in Settings. All-true
+// reproduces the legacy <base>/<author>/<mode>/<date>_<title>_<id>/ layout.
+// See composeItemFolder() / resolveItemDir() for the composition rules.
+export interface PathPrefs {
+  author: boolean;
+  mode: boolean;
+  date: boolean;
+  title: boolean;
+}
+
+export const DEFAULT_PATH_PREFS: PathPrefs = { author: true, mode: false, date: false, title: true };
+
+// Build the leaf folder (and the matching filename prefix). Always includes the
+// id, since dropping all 4 toggles still needs a stable folder name.
+export function composeItemFolder(parts: {
+  date?: string;
+  title?: string;
+  id: string;
+}, prefs: PathPrefs): string {
+  const tokens: string[] = [];
+  if (prefs.date && parts.date) tokens.push(parts.date);
+  if (prefs.title && parts.title) tokens.push(parts.title);
+  tokens.push(parts.id);
+  return sanitizeFilename(tokens.join("_"));
+}
+
 export interface DownloaderOptions {
   // null in native mode (default) — the sidecar isn't started. Present only
   // when DOUYIN_HOZON_PARSER=sidecar (break-glass).
@@ -62,6 +89,7 @@ export interface DownloaderOptions {
   baseDir: string;            // e.g. "./Downloaded"
   modeFolder: string;         // "post" | "like" | "mix" | "music" | "collect"
   flags: DownloadFlags;
+  pathPrefs?: PathPrefs;      // defaults to DEFAULT_PATH_PREFS (all-on, legacy)
   parallelism?: number;       // default 5
   bus?: ProgressBus;
   dateFilter?: DateFilter;
@@ -113,13 +141,20 @@ export async function downloadAweme(
   bundle: AwemeAssetBundle,
   options: DownloaderOptions,
 ): Promise<ItemOutcome> {
+  const prefs = options.pathPrefs ?? DEFAULT_PATH_PREFS;
+  const itemFolder = composeItemFolder(
+    { date: bundle.publish_date, title: bundle.title, id: bundle.aweme_id },
+    prefs,
+  );
   const { itemDir } = await resolveItemDir({
     baseDir: options.baseDir,
-    author: bundle.author.name || "unknown_author",
-    mode: options.modeFolder,
-    itemFolder: bundle.file_stem,
+    author: prefs.author ? (bundle.author.name || "unknown_author") : undefined,
+    mode: prefs.mode ? options.modeFolder : undefined,
+    itemFolder,
   });
-  const names = fileNamesForStem(bundle.file_stem);
+  // The filename stem mirrors the folder name — when pathDate/pathTitle are off
+  // they vanish from both at once.
+  const names = fileNamesForStem(itemFolder);
   const written: string[] = [];
 
   options.bus?.emitProgress({
@@ -198,31 +233,37 @@ export async function downloadMusicTrack(
     };
   }
 
+  const prefs = options.pathPrefs ?? DEFAULT_PATH_PREFS;
+  // Music has no publish date, so pathDate is a no-op here.
+  const itemFolder = composeItemFolder(
+    { title: bundle.title, id: bundle.music_id },
+    prefs,
+  );
   const { itemDir } = await resolveItemDir({
     baseDir: options.baseDir,
-    author: bundle.author || "unknown_author",
-    mode: options.modeFolder,
-    itemFolder: bundle.file_stem,
+    author: prefs.author ? (bundle.author || "unknown_author") : undefined,
+    mode: prefs.mode ? options.modeFolder : undefined,
+    itemFolder,
   });
 
   const written: string[] = [];
   options.bus?.emitProgress({ kind: "item-start", title: bundle.title, index: 0 });
   try {
-    const audioPath = path.join(itemDir, `${bundle.file_stem}.mp3`);
+    const audioPath = path.join(itemDir, `${itemFolder}.mp3`);
     await pullAsset(bundle.audio, audioPath, options);
     written.push(audioPath);
 
     if (options.flags.cover) {
       const out = await pullOptional(
         bundle.cover,
-        path.join(itemDir, `${bundle.file_stem}_cover.jpg`),
+        path.join(itemDir, `${itemFolder}_cover.jpg`),
         options,
       );
       if (out) written.push(out);
     }
     if (options.flags.json) {
       const out = await writeJsonMetadata(
-        path.join(itemDir, `${bundle.file_stem}_data.json`),
+        path.join(itemDir, `${itemFolder}_data.json`),
         bundle.raw,
       );
       written.push(out);

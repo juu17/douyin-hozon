@@ -13,9 +13,13 @@ export const THEME = {
 
 export const GLYPHS = {
   spinner: ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"],
-  active: "▣",
-  checkboxOn: "☑",
-  checkboxOff: "☐",
+  // Mode-list "currently selected" chevron — a chevron/arrow reads as
+  // "cursor is here" instead of "this is toggled on" (which ▣ implied).
+  modeSelected: "❯",
+  // Matched circle pair (Vercel CLI / Inquirer / prompts convention).
+  // Both glyphs share the same design grid so widths + stroke weights align.
+  checkboxOn: "◉",
+  checkboxOff: "◯",
   success: "✓",
   warning: "△",
   separator: "·",

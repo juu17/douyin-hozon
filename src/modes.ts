@@ -9,7 +9,7 @@ export type ModeId =
   | "creator-liked-posts"
   | "my-favorite-collection";
 
-export type FieldKind = "text" | "number" | "boolean" | "readonly";
+export type FieldKind = "text" | "number" | "boolean" | "readonly" | "path-toggle" | "cookie";
 export type FieldPlacement = "task" | "settings";
 
 export type ValueMap = Record<string, string | boolean>;
@@ -49,6 +49,14 @@ export interface FieldDefinition {
   // Marks fields whose committed value can be a short URL that should be
   // followed via HTTP redirect by use-url-resolver.ts.
   resolvable?: boolean;
+  // For kind: "path-toggle" — the option name shown next to the checkbox
+  // (e.g. "author_name"). Multiple path-toggle fields share the same on-screen
+  // "Path Preference" label; only the first carries it non-blank.
+  option?: string;
+  // For kind: "cookie" — the cookie name shown in a left-aligned sub-column
+  // before the value (e.g. "msToken"). All 5 cookie fields share one
+  // on-screen "Cookies" label; only the first carries it non-blank.
+  subLabel?: string;
 }
 
 export interface ModeDefinition {
@@ -61,6 +69,13 @@ export interface ModeDefinition {
 const commonSettingsFields: FieldDefinition[] = [
   { id: "thread", label: "Concurrent Downloads", kind: "number", placement: "settings", placeholder: "5" },
   { id: "retryTimes", label: "Retry Times", kind: "number", placement: "settings", placeholder: "3" },
+  // Path Preference cluster — 4 rows, single visual label on the first.
+  // Toggling reshapes both the directory tree and the filename stem; see
+  // engine/file-layout.ts + engine/downloader.ts for the composition rules.
+  { id: "pathAuthor", label: "Path Preference", kind: "path-toggle", placement: "settings", option: "author_name" },
+  { id: "pathMode",   label: "",                kind: "path-toggle", placement: "settings", option: "mode_folder" },
+  { id: "pathDate",   label: "",                kind: "path-toggle", placement: "settings", option: "date" },
+  { id: "pathTitle",  label: "",                kind: "path-toggle", placement: "settings", option: "title" },
   { id: "quietLogs", label: "Quiet Logs", kind: "boolean", placement: "settings" },
   {
     id: "proxy",
@@ -69,11 +84,14 @@ const commonSettingsFields: FieldDefinition[] = [
     placement: "settings",
     placeholder: "http://127.0.0.1:7890",
   },
-  { id: "msToken", label: "msToken", kind: "text", placement: "settings" },
-  { id: "ttwid", label: "ttwid", kind: "text", placement: "settings" },
-  { id: "odin_tt", label: "odin_tt", kind: "text", placement: "settings" },
-  { id: "passportCsrfToken", label: "passport_csrf_token", kind: "text", placement: "settings" },
-  { id: "sidGuard", label: "sid_guard", kind: "text", placement: "settings" },
+  // Cookies cluster — 5 rows, single "Cookies" label on the first.
+  // Captured cookieJar values show through as the displayed value when the
+  // manual override is empty (settings-dialog COOKIE_FALLBACK_KEY).
+  { id: "msToken",           label: "Cookies", kind: "cookie", placement: "settings", subLabel: "msToken" },
+  { id: "ttwid",             label: "",        kind: "cookie", placement: "settings", subLabel: "ttwid" },
+  { id: "odin_tt",           label: "",        kind: "cookie", placement: "settings", subLabel: "odin_tt" },
+  { id: "passportCsrfToken", label: "",        kind: "cookie", placement: "settings", subLabel: "passport_csrf_token" },
+  { id: "sidGuard",          label: "",        kind: "cookie", placement: "settings", subLabel: "sid_guard" },
 ];
 
 const mediaTaskFields: FieldDefinition[] = [
@@ -249,6 +267,13 @@ export const DEFAULT_VALUES: ValueMap = {
   includeJson: true,
   thread: "5",
   retryTimes: "3",
+  // Path Preference defaults: author + title on, mode_folder + date off.
+  // Lands new downloads at <save>/<author>/<title>_<id>/<title>_<id>.mp4 —
+  // shallower than the legacy 4-level tree without losing creator grouping.
+  pathAuthor: true,
+  pathMode: false,
+  pathDate: false,
+  pathTitle: true,
   quietLogs: true,
   proxy: "",
   msToken: "",

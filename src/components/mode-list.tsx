@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Text, useInput } from "ink";
 import { MODE_DEFINITIONS } from "../modes.js";
 import { useStore } from "../state/store.js";
-import { THEME } from "../theme/index.js";
+import { GLYPHS, THEME } from "../theme/index.js";
 import { Panel } from "./panel.js";
 
 export function ModeList() {
@@ -35,7 +35,7 @@ export function ModeList() {
           const bg = selected ? THEME.primary : undefined;
           return (
             <Text key={mode.id} color={fg} backgroundColor={bg} bold={selected} wrap="truncate-end">
-              {selected ? " ▣ " : "   "}
+              {selected ? ` ${GLYPHS.modeSelected} ` : "   "}
               {mode.title}
             </Text>
           );
