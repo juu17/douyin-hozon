@@ -20,7 +20,7 @@ URL fields accept the noisy "share text" douyin gives you (like `5.12 Z@m... Des
 ## Requirements
 
 - **Node.js 18+**
-- **macOS or Windows** (for the one-click Chrome cookie capture)
+- **macOS, Windows, or Linux.** macOS and Windows get one-click Chrome cookie capture. Linux runs the app fine; you just paste the 5 cookies into Settings manually instead.
 - **Google Chrome** with douyin signed in (any profile — it auto-picks the right one)
 
 No Python, no virtualenv. The app is pure TypeScript/Node — it parses douyin
@@ -71,12 +71,12 @@ To download something:
 4. Tweak any optional fields you want (cover/music/avatar/JSON, item limits for batch modes).
 5. Tab to the **Download** button → `Enter`.
 
-Files land under `~/Downloads/douyin-hozon/<author>/<mode>/<date>_<title>_<id>/`. Change the **Save Path** field to land them anywhere else.
+Files land under your OS Downloads dir + `douyin-hozon/` by default — `~/Downloads/douyin-hozon/` on macOS, `%USERPROFILE%\Downloads\douyin-hozon\` on Windows, your `$XDG_DOWNLOAD_DIR` (or `~/Downloads`) on Linux. The layout is `<save>/<author>/<title>_<id>/<title>_<id>.mp4` out of the box; toggle the **Path Preference** cluster in Settings to also include the mode folder or a date prefix. Set the **Save Path** field to land them anywhere else.
 
 ## Tips
 
 - **Hold Backspace** for ~3 seconds to wipe the field you're editing.
-- **Settings** (`/` → `/settings`) holds shared configuration: concurrent download limit, retry count, proxy, manual cookie overrides.
+- **Settings** (`/` → `/settings`) holds shared configuration: concurrent download limit, retry count, **Path Preference** (which of `author_name` / `mode_folder` / `date` / `title` appear in the path + filename), proxy, and a **Cookies** cluster (`msToken` / `ttwid` / `odin_tt` / `passport_csrf_token` / `sid_guard`) that shows the captured values inline and lets you override per-key.
 - **Item Limit** for batch modes (Collection / Creator Liked / Favorites): set it to a small number (`2`) the first time so you can verify things work before pulling hundreds.
 - **Settings persist automatically.** All your inputs across the 6 modes (URLs, save path, toggles, captured cookies) are auto-saved to `./config.yml` as you edit. `config.yml` is gitignored; the template lives at `config.example.yml`.
 - If you have multiple douyin accounts in different Chrome profiles, the app automatically picks the profile with the most douyin cookies.

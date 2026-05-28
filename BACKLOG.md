@@ -4,9 +4,9 @@ Follow-up items left open. Not blockers — the TUI ships and runs without them.
 
 ## 1. Mouse support
 
-**Status**: not wired. Ink does not ship first-class mouse; the previous blessed implementation supported click-to-focus and click-outside-dismiss.
+**Status**: not wired. Ink does not ship first-class mouse support.
 
-**Why**: matches opencode-style keyboard-first UX in the meantime, but loses parity with the prior build for users who reach for the mouse.
+**Why**: keyboard-first UX is the project's bias, but losing click-to-focus / click-outside-dismiss still nicks the experience for users who reach for the mouse.
 
 **Sketch**: write a small parser for ANSI mouse escape sequences (`\x1b[<...M`) on `process.stdin` and dispatch store actions (`SET_TASK_INDEX`, `FOCUS_PANEL`, `CLOSE_DIALOG` for outside-clicks). Enable with `process.stdout.write('\x1b[?1000h\x1b[?1006h')` on mount; disable on unmount. Likely lives in a new `src/state/use-mouse.ts`. Components opt in by reading mouse coordinates from a context, OR map row index to position via refs.
 
@@ -32,19 +32,14 @@ What's still pending: a richer multi-line progress widget (per-item filename,
 overall bar, ETA). The structured events are already there — only the UI
 surface is minimal. ~half a day of UI work when wanted.
 
-## 4. Test coverage with `ink-testing-library`
+## 4. Test coverage with `ink-testing-library` — RESOLVED
 
-**Status**: zero tests. The Ink migration unlocks `ink-testing-library` (snapshot testing of rendered output), but no tests have been written yet.
-
-**Why**: regressions on focus state, dialog chrome, and field rendering are exactly the kind of thing snapshot tests catch cheaply. The previous blessed-based code couldn't be tested at all.
-
-**Sketch**: add `ink-testing-library` and `vitest` (or `node --test`) as devDependencies. First-pass targets:
-- Snapshot per mode of `<TaskForm>` rendered with default values.
-- `<Dialog>` chrome consistency (settings, alert, command palette should produce visually-equivalent borders/title placement).
-- Focus rotation: simulate Tab, assert `panelFocus` flips.
-- Reducer: pure function, easy unit tests for SET_VALUE / MERGE_VALUES / OPEN_DIALOG.
-
-**Effort**: ~half a day to bootstrap, ongoing.
+**Status**: closed. vitest + `ink-testing-library` are wired
+([vitest.config.ts](vitest.config.ts), [tests/monkey/harness.tsx](tests/monkey/harness.tsx))
+and the suite covers all 6 modes end-to-end ([tests/monkey/](tests/monkey/))
+plus the native parser / signer / config-persist / engine layers
+([tests/native/](tests/native/), [tests/state/](tests/state/), [tests/engine/](tests/engine/)).
+Current count: 150 tests across 20 files, green on every commit.
 
 ## 5. Settings dialog draft persistence
 
