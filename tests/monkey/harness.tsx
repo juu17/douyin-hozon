@@ -4,7 +4,7 @@ import fs from "node:fs";
 import React from "react";
 import { render } from "ink-testing-library";
 import { App } from "../../src/app.js";
-import { StoreProvider } from "../../src/state/store.js";
+import { StoreProvider, type AppState } from "../../src/state/store.js";
 
 // Key encodings the TUI's useInput handlers understand.
 export const KEY = {
@@ -32,13 +32,15 @@ export interface MonkeyApp {
 // Render the full App with a clean, isolated cwd so the bootstrap finds no
 // config.yml (deterministic: starts at mode index 0, default values, no
 // pre-filled URLs). Returns the ink-testing-library instance + a cwd restorer.
-export function launchMonkey(): MonkeyApp & { cleanup: () => void } {
+export function launchMonkey(
+  initial?: Partial<AppState>,
+): MonkeyApp & { cleanup: () => void } {
   const prevCwd = process.cwd();
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "hozon-monkey-"));
   process.chdir(tmp);
 
   const app = render(
-    <StoreProvider>
+    <StoreProvider initial={initial}>
       <App />
     </StoreProvider>,
   );

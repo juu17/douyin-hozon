@@ -115,7 +115,7 @@ export const INITIAL_STATE: AppState = withValues({
   cookieJar: null,
 });
 
-function reducer(state: AppState, action: Action): AppState {
+export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case "SET_MODE":
       if (action.modeId === state.modeId) return state;
@@ -220,7 +220,15 @@ function reducer(state: AppState, action: Action): AppState {
       if (state.status === action.status) return state;
       return { ...state, status: action.status };
     case "SET_DOWNLOAD_ACTIVE":
-      return { ...state, downloadActive: action.active };
+      // When a download ENDS (finish/fail), park the cursor back on the mode's
+      // URL field — row 0, the same landing spot SET_MODE uses — so the user
+      // pastes the next link instead of pressing Enter on the just-finished
+      // Download button again. Starting a download leaves taskIndex alone.
+      return {
+        ...state,
+        downloadActive: action.active,
+        taskIndex: action.active ? state.taskIndex : 0,
+      };
     case "SET_COOKIE_CAPTURE_ACTIVE":
       return { ...state, cookieCaptureActive: action.active };
     case "SET_COOKIE_JAR":

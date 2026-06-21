@@ -54,6 +54,9 @@ export function TaskForm() {
       }
       if (key.return) {
         if (taskIndex === downloadRowIndex) {
+          // Ongoing download: the Download button reads "Downloading…" and is
+          // inert, so Enter can't kick off a duplicate run.
+          if (state.downloadActive) return;
           void downloader.launch();
           return;
         }
@@ -99,7 +102,11 @@ export function TaskForm() {
         })}
       </Box>
       <Box marginTop={1} justifyContent="flex-end">
-        <Button label="Download" focused={focused && taskIndex === downloadRowIndex} enabled={!state.downloadActive} />
+        <Button
+          label={state.downloadActive ? "Downloading…" : "Download"}
+          focused={focused && taskIndex === downloadRowIndex}
+          enabled={!state.downloadActive}
+        />
       </Box>
     </Panel>
   );
