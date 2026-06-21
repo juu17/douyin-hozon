@@ -4,6 +4,8 @@ A terminal app for downloading douyin media without leaving the keyboard. Paste 
 
 ## Quick start
 
+https://github.com/user-attachments/assets/b87ba7df-0997-4322-9e65-c880390cba04
+
 ```bash
 git clone <this-repo>
 cd douyin-hozon
