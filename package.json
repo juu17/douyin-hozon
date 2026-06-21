@@ -7,10 +7,15 @@
   "bin": {
     "douyin-hozon": "dist/index.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "prepublishOnly": "pnpm build",
     "prerequisite": "bash ./prerequisite.sh",
     "dev": "bash ./prerequisite.sh && tsx src/index.tsx",
-    "build": "tsc -p tsconfig.json",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "pnpm clean && tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "test": "vitest run",
