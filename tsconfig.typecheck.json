@@ -1,0 +1,18 @@
+{
+  // Type-checking only (noEmit): widens coverage to tests/ and tools/, which
+  // the build tsconfig deliberately excludes (it emits src/ → dist/ only).
+  // `pnpm typecheck` uses this so test + tooling type errors fail CI too.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".",
+    "types": ["node"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    "tools/**/*.ts"
+  ]
+}

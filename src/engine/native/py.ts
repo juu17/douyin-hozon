@@ -23,12 +23,15 @@ export function pythonTruthy(v: unknown): boolean {
 }
 
 // Faithful port of Python's `a or b or c ...`: returns the first Python-truthy
-// operand, or the LAST operand if all are falsy (`x or ""` yields "" ).
-export function pyOr<T>(...values: T[]): T {
+// operand, or the LAST operand if all are falsy (`x or ""` yields "" ). Like
+// Python, the operands are heterogeneous and the result is the UNION of their
+// types — hence the variadic-tuple signature (a single `<T>` would wrongly
+// unify every operand to the first one's type).
+export function pyOr<T extends unknown[]>(...values: [...T]): T[number] {
   for (const v of values) {
     if (pythonTruthy(v)) return v;
   }
-  return values[values.length - 1] as T;
+  return values[values.length - 1];
 }
 
 // Faithful port of Python int(x) for JSON-shaped values: floats truncate
